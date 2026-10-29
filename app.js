@@ -108,7 +108,7 @@
   }
 
   var weeksEl = document.getElementById("weeks");
-  var selected = null; // date string of the tapped day
+  var selected = {}; // open day per week (0, 1, 2): its date string
 
   function cell(content, cls) {
     var td = document.createElement("td");
@@ -150,6 +150,7 @@
     weeksEl.textContent = "";
     ["This week", "Next week", "In two weeks"].forEach(function (title, w) {
       var week = days.slice(w * 7, w * 7 + 7);
+      var open = selected[w] || null;
       var start = parseDate(week[0].date), end = parseDate(week[6].date);
 
       var card = el("article", "card tight");
@@ -173,15 +174,15 @@
         var btn = el("button", "day-btn");
         btn.type = "button";
         btn.disabled = !!d.empty;
-        btn.setAttribute("aria-pressed", selected === d.date ? "true" : "false");
+        btn.setAttribute("aria-pressed", open === d.date ? "true" : "false");
         btn.setAttribute("aria-label", FULL[i] + " " + dd.getUTCDate() + (d.empty ? "" : ", show hours"));
         btn.appendChild(el("span", "dow", DOW[i]));
         btn.appendChild(el("span", "date", String(dd.getUTCDate())));
         btn.addEventListener("click", function () {
-          selected = selected === d.date ? null : d.date;
+          selected[w] = open === d.date ? null : d.date;
           renderWeeks(days, observedAt);
         });
-        th.className = (d.today ? "today" : d.past ? "past" : "") + (selected === d.date ? " picked" : "");
+        th.className = (d.today ? "today" : d.past ? "past" : "") + (open === d.date ? " picked" : "");
         th.appendChild(btn);
         hr.appendChild(th);
       });
@@ -194,7 +195,7 @@
         var rh = el("th", "row-label", label); rh.scope = "row";
         tr.appendChild(rh);
         week.forEach(function (d, i) {
-          var cls = classes[i] + (selected === d.date ? " picked" : "");
+          var cls = classes[i] + (open === d.date ? " picked" : "");
           tr.appendChild(d.empty ? cell("–", cls) : cell(fn(d), cls));
         });
         tbody.appendChild(tr);
@@ -223,7 +224,7 @@
       table.appendChild(tbody);
       card.appendChild(table);
 
-      var pick = week.filter(function (d) { return d.date === selected && !d.empty; })[0];
+      var pick = week.filter(function (d) { return d.date === open && !d.empty; })[0];
       if (pick && pick.hours) card.appendChild(hourPanel(pick));
 
       if (w === 0 && week.some(function (d) { return d.past && !d.empty; })) {
@@ -271,7 +272,7 @@
     };
   }
 
-  var WORDS = { SUN: "Sunny", CLEAR: "Clear", MIX: "Some cloud", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
+  var WORDS = { SUN: "Sunny", CLEAR: "Clear", MIX: "Partly cloudy", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
 
   function feel(temp) {
     if (temp <= 0) return "frosty";
@@ -318,7 +319,7 @@
     nowCard.temp.textContent = deg(now.temp);
     nowCard.chip.textContent = now.word;
     nowCard.chip.setAttribute("data-w", now.word);
-    nowCard.line.textContent = (WORDS[now.word] || "Mixed") + " and " + feel(now.temp) +
+    nowCard.line.textContent = (WORDS[now.word] || "Changeable") + " and " + feel(now.temp) +
       (now.wind !== null ? " · " + now.wind + "\u00a0m/s" : "");
 
     var todayHours = hours.filter(function (h) { return clock(h.t).day === local.day; });
