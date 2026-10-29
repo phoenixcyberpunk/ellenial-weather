@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ellenial Weather</title>
+<meta name="description" content="Free, combined weather forecast and what usually happens. No ads, no tracking.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#EEF3F6">
+<link rel="preload" href="fonts/fraunces-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<main class="page">
+
+  <header class="top">
+    <h1 class="brand">Ellenial Weather</h1>
+    <button type="button" class="place" disabled aria-label="Place: Gothenburg">Gothenburg ▾</button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="View">
+    <button type="button" class="tab" role="tab" id="tab-forecast" aria-controls="view-forecast" aria-selected="true">Forecast</button>
+    <button type="button" class="tab" role="tab" id="tab-usually" aria-controls="view-usually" aria-selected="false" tabindex="-1">What usually happens</button>
+  </div>
+
+  <p class="skeleton-note">Skeleton page. Real forecasts arrive in the next build step.</p>
+
+  <!-- Forecast: opens first. Today is the main feature. -->
+  <section id="view-forecast" role="tabpanel" aria-labelledby="tab-forecast">
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <article class="card" aria-labelledby="now-label">
+        <h2 class="label" id="now-label">Right now · <span id="today-label"></span></h2>
+        <div class="now">
+          <div class="now-temp">–°</div>
+          <div class="now-text">
+            <span class="chip">–</span>
+            <div class="now-line">Waiting for forecasts</div>
+            <div class="now-sub">High – · low –</div>
+          </div>
+        </div>
+        <div class="hours" id="today-hours"></div>
+        <div class="rain">
+          <button type="button" class="rain-toggle" aria-expanded="false" disabled>
+            <span><b>Rain today:</b> –</span><span class="muted" aria-hidden="true">▼</span>
+          </button>
+        </div>
+      </article>
+
+      <div id="weeks" style="display:flex;flex-direction:column;gap:16px"></div>
+
+      <aside class="normals">
+        <h2 class="label">After the forecasts end</h2>
+        <p>No forecast reaches this far yet. The normal for this time of year will show here.</p>
+        <button type="button" class="link-button" data-go="usually">See what usually happens ›</button>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- What usually happens: odds from past weather, never predictions. -->
+  <section id="view-usually" role="tabpanel" aria-labelledby="tab-usually" hidden>
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <article class="card">
+        <h2 class="label">Usually this week</h2>
+        <div class="stats">
+          <div class="stat"><span class="stat-name">Temp</span><span class="stat-value">–</span></div>
+          <div class="stat"><span class="stat-name">Rain</span><span class="stat-value">–</span></div>
+          <div class="stat"><span class="stat-name">Sun</span><span class="stat-value">–</span></div>
+        </div>
+      </article>
+
+      <article class="card"><h2 class="title">Frost</h2><p class="section-text muted">First autumn frost and last spring frost, as odds.</p></article>
+      <article class="card"><h2 class="title">Sunny days</h2><p class="section-text muted">Days with 6+ hours of sun, average per month.</p></article>
+      <article class="card">
+        <h2 class="title">UV</h2>
+        <p class="section-text muted">When UV usually passes 3, month by month.</p>
+        <p class="caveat">UV has been recorded for far fewer years than temperature, so this is a rough guide.</p>
+      </article>
+      <article class="card"><h2 class="title">How it's changing</h2><p class="section-text muted">The 1990s compared with the last 10 years.</p></article>
+
+    </div>
+  </section>
+
+  <footer>
+    <p class="credits">
+      Data: <a href="https://www.smhi.se/">SMHI</a>, <a href="https://www.met.no/">MET Norway</a> and models via
+      <a href="https://open-meteo.com/">Open-Meteo</a>, CC BY 4.0, processed and combined by Ellenial.
+      Free, no ads, no tracking, no accounts. Open source on
+      <a href="https://github.com/phoenixcyberpunk/ellenial-weather">GitHub</a>.
+      Made by <a href="https://ellenial.app">Ellenial</a>.
+    </p>
+  </footer>
+
+</main>
+</body>
+</html>
