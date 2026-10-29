@@ -164,8 +164,6 @@
       var cap = el("caption", "sr-only", title);
       table.appendChild(cap);
       var thead = el("thead"), hr = el("tr");
-      var corner = el("th", "row-label"); corner.setAttribute("aria-hidden", "true");
-      hr.appendChild(corner);
       var classes = week.map(function (d) { return d.today ? "today-col" : d.past ? "past" : d.empty ? "beyond" : ""; });
 
       week.forEach(function (d, i) {
@@ -190,29 +188,33 @@
       table.appendChild(thead);
 
       var tbody = el("tbody");
-      function row(label, fn) {
+      // No visible row labels (the legend under the table explains them);
+      // each cell tells screen readers what it holds instead.
+      function row(label, fn, spoken) {
         var tr = el("tr");
-        var rh = el("th", "row-label", label); rh.scope = "row";
-        tr.appendChild(rh);
         week.forEach(function (d, i) {
           var cls = classes[i] + (open === d.date ? " picked" : "");
-          tr.appendChild(d.empty ? cell("–", cls) : cell(fn(d), cls));
+          var td = d.empty ? cell("–", cls) : cell(fn(d), cls);
+          td.setAttribute("aria-label", d.empty ? label + ": no forecast yet" : label + ": " + spoken(d));
+          tr.appendChild(td);
         });
         tbody.appendChild(tr);
       }
-      row("Weather", function (d) { var c = el("span", "week-word", d.word); c.setAttribute("data-w", d.word); return c; });
-      row("Temp °C", function (d) {
+      row("Weather", function (d) { var c = el("span", "week-word", d.word); c.setAttribute("data-w", d.word); return c; },
+        function (d) { return d.word.toLowerCase(); });
+      row("Temperature", function (d) {
         var f = document.createDocumentFragment();
         f.appendChild(el("span", "week-hi", Math.round(d.hi) + "°"));
         f.appendChild(el("span", "week-lo", Math.round(d.lo) + "°"));
         return f;
-      });
-      row("Rain mm", function (d) {
+      }, function (d) { return "high " + Math.round(d.hi) + ", low " + Math.round(d.lo) + " degrees"; });
+      row("Rain", function (d) {
         if (d.mm === null || d.mm === undefined) return "–";
         var s = el("span", d.mm >= 1 ? "wet" : "", String(d.mm >= 0.1 ? (d.mm >= 10 ? Math.round(d.mm) : d.mm) : 0));
         return s;
-      });
-      row("Wind m/s", function (d) { return d.wind === null ? "–" : String(d.wind); });
+      }, function (d) { return d.mm === null || d.mm === undefined ? "unknown" : (d.mm >= 0.1 ? d.mm : 0) + " millimetres"; });
+      row("Wind", function (d) { return d.wind === null ? "–" : String(d.wind); },
+        function (d) { return d.wind === null ? "unknown" : d.wind + " metres per second"; });
       row("How sure", function (d) {
         if (d.sure === null || d.sure === undefined) return ""; // past days: the note under the table says where they come from
         var s = el("span", "sure");
@@ -220,9 +222,16 @@
         s.appendChild(el("span", "sure-on", "●".repeat(d.sure)));
         s.appendChild(el("span", "sure-off", "●".repeat(3 - d.sure)));
         return s;
-      });
+      }, function (d) { return d.sure ? ["", "less sure", "fairly sure", "sure"][d.sure] : "measured"; });
       table.appendChild(tbody);
       card.appendChild(table);
+
+      var legend = el("p", "week-legend");
+      legend.setAttribute("aria-hidden", "true"); // the cells already say this to screen readers
+      legend.appendChild(document.createTextNode("High/low °C · rain mm · wind m/s · "));
+      var dots = el("span", "sure-on", "●●●"); legend.appendChild(dots);
+      legend.appendChild(document.createTextNode(" how sure"));
+      card.appendChild(legend);
 
       var pick = week.filter(function (d) { return d.date === open && !d.empty; })[0];
       if (pick && pick.hours) card.appendChild(hourPanel(pick));
