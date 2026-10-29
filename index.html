@@ -25,8 +25,6 @@
     <button type="button" class="tab" role="tab" id="tab-usually" aria-controls="view-usually" aria-selected="false" tabindex="-1">What usually happens</button>
   </div>
 
-  <p class="skeleton-note">Skeleton page. Real forecasts arrive in the next build step.</p>
-
   <!-- Forecast: opens first. Today is the main feature. -->
   <section id="view-forecast" role="tabpanel" aria-labelledby="tab-forecast">
     <div style="display:flex;flex-direction:column;gap:16px">
@@ -43,9 +41,13 @@
         </div>
         <div class="hours" id="today-hours"></div>
         <div class="rain">
-          <button type="button" class="rain-toggle" aria-expanded="false" disabled>
+          <button type="button" class="rain-toggle" aria-expanded="false" aria-controls="rain-detail" disabled>
             <span><b>Rain today:</b> –</span><span class="muted" aria-hidden="true">▼</span>
           </button>
+          <div id="rain-detail" class="rain-detail" hidden>
+            <div id="rain-dots" class="rain-dots"></div>
+            <p id="rain-text" class="rain-text"></p>
+          </div>
         </div>
       </article>
 
@@ -87,8 +89,8 @@
 
   <footer>
     <p class="credits">
-      Data: <a href="https://www.smhi.se/">SMHI</a>, <a href="https://www.met.no/">MET Norway</a> and models via
-      <a href="https://open-meteo.com/">Open-Meteo</a>, CC BY 4.0, processed and combined by Ellenial.
+      <span id="source-count"></span>Data: <a href="https://www.smhi.se/">SMHI</a>, <a href="https://www.met.no/">MET Norway</a> and models via
+      <a href="https://open-meteo.com/">Open-Meteo</a> (ECMWF, DWD ICON, DMI, NOAA GFS), CC BY 4.0, processed and combined by Ellenial.
       Free, no ads, no tracking, no accounts. Open source on
       <a href="https://github.com/phoenixcyberpunk/ellenial-weather">GitHub</a>.
       Made by <a href="https://ellenial.app">Ellenial</a>.
