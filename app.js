@@ -178,9 +178,10 @@
         btn.setAttribute("aria-label", FULL[i] + " " + dd.getUTCDate() + (d.empty ? "" : ", show hours"));
         btn.appendChild(el("span", "dow", DOW[i]));
         btn.appendChild(el("span", "date", String(dd.getUTCDate())));
-        btn.addEventListener("click", function () {
+        btn.addEventListener("click", function (e) {
           selected[w] = open === d.date ? null : d.date;
-          tapped = { week: w, day: i, opened: !!selected[w] };
+          // e.detail is 0 for keyboard presses, 1+ for taps and clicks
+          tapped = { week: w, day: i, opened: !!selected[w], keyboard: e.detail === 0 };
           renderWeeks(days, observedAt);
         });
         th.className = (d.today ? "today" : d.past ? "past" : "") + (open === d.date ? " picked" : "");
@@ -251,21 +252,24 @@
     followTap();
   }
 
-  // The tables are rebuilt on every tap: put focus back on the tapped day, and if
-  // a day just opened, scroll only as far as needed to show its hours in full.
+  // The tables are rebuilt on every tap. If a day just opened, jump only as far as needed
+  // to show its hours in full. This is an instant jump on purpose: on iPhone, a smooth
+  // programmatic scroll can leave taps landing in the wrong place until you scroll by hand.
+  // Focus goes back to the day only for keyboard users (taps on a phone don't need it).
   function followTap() {
     if (!tapped) return;
     var t = tapped; tapped = null;
     var card = weeksEl.children[t.week];
     if (!card) return;
-    var btn = card.querySelectorAll(".day-btn")[t.day];
-    if (btn) btn.focus({ preventScroll: true });
+    if (t.keyboard) {
+      var btn = card.querySelectorAll(".day-btn")[t.day];
+      if (btn) btn.focus({ preventScroll: true });
+    }
     var panel = t.opened && card.querySelector(".day-hours");
     if (!panel) return;
-    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    requestAnimationFrame(function () {
-      panel.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
-    });
+    var r = panel.getBoundingClientRect();
+    var below = r.bottom - (window.innerHeight - 12);
+    if (below > 0) window.scrollBy(0, Math.min(below, Math.max(0, r.top - 12)));
   }
 
   renderWeeks(placeholderDays(), null);
