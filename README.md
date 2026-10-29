@@ -23,18 +23,22 @@ Data is processed and combined by Ellenial.
 
 ## How it's built
 
-A static page (`index.html`, `styles.css`, `app.js`), no build step. Small serverless functions in `api/` on Vercel will fetch and combine the forecasts:
+A static page (`index.html`, `styles.css`, `app.js`), no build step. Small serverless functions in `api/` on Vercel fetch and combine the forecasts:
 
 - `/api/forecast` — combined forecast per hour, cached 30–60 min
 - `/api/observed` — measured past days from the nearest SMHI station
 - `/api/history` — frost odds, sunny days, UV and then-vs-now, cached for weeks
 
-Each source is its own small module, so a broken source drops out instead of breaking the page.
+Each source is its own small module in `lib/sources/`, so a broken source drops out instead of breaking the page. Six forecasts today: SMHI, MET Norway, ECMWF, DWD ICON, DMI and NOAA GFS (Open-Meteo's MET Norway copy and second ECMWF are left out so no model counts twice).
+
+How sure: 3 dots when the forecasts are within 2° of each other and at least 80% agree on rain or no rain; 2 dots within 4° and 60%; otherwise 1. Never more than 2 dots with fewer than 3 forecasts.
+
+Tests: `node --test`.
 
 ## Build plan
 
 1. Skeleton: repo, Vercel project, domain, both views, credits ← *done*
-2. Forecast for Gothenburg: right now, today hour by hour, rain line
+2. Forecast for Gothenburg: right now, today hour by hour, rain line ← *done*
 3. Week tables with measured past days
 4. What usually happens
 5. Place search
