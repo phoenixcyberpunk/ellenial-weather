@@ -25,13 +25,16 @@ Data is processed and combined by Ellenial.
 
 A static page (`index.html`, `styles.css`, `app.js`), no build step. Small serverless functions in `api/` on Vercel fetch and combine the forecasts:
 
-- `/api/forecast` — combined forecast per hour, cached 30–60 min
-- `/api/observed` — measured past days from the nearest SMHI station
+- `/api/forecast` — combined forecast per hour (today and the next two days) and per day (Monday this week to Sunday the week after), cached 30 min
 - `/api/history` — frost odds, sunny days, UV and then-vs-now, cached for weeks
 
 Each source is its own small module in `lib/sources/`, so a broken source drops out instead of breaking the page. Six forecasts today: SMHI, MET Norway, ECMWF, DWD ICON, DMI and NOAA GFS (Open-Meteo's MET Norway copy and second ECMWF are left out so no model counts twice).
 
 How sure: 3 dots when the forecasts are within 2° of each other and at least 80% agree on rain or no rain; 2 dots within 4° and 60%; otherwise 1. Never more than 2 dots with fewer than 3 forecasts.
+
+Past days: what SMHI's nearest weather station measured (temperature, rain and wind, hourly; within 30 km and reporting in the last 6 hours; for Gothenburg that's Göteborg A). Stations rarely measure cloud, so the weather word for a past day uses the measured rain plus the models' cloud cover. With no station nearby (outside Sweden, for now), past days come from the models' own records, and the page says so.
+
+A day gets a summary when at least 18 of its hours have data; later days show a dash. Daily How sure compares each forecast's high and whether it brings at least 1 mm of rain.
 
 Tests: `node --test`.
 
@@ -39,7 +42,7 @@ Tests: `node --test`.
 
 1. Skeleton: repo, Vercel project, domain, both views, credits ← *done*
 2. Forecast for Gothenburg: right now, today hour by hour, rain line ← *done*
-3. Week tables with measured past days
+3. Week tables with measured past days ← *done*
 4. What usually happens
 5. Place search
 6. Friends test, then decide on release
