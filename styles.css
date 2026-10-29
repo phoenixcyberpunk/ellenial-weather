@@ -74,6 +74,11 @@
 
 * { box-sizing: border-box; }
 
+/* Taps are taps: no double-tap zoom (it swallowed quick second taps on days).
+   Pinch-to-zoom stays on purpose, for anyone who needs bigger text. */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
 body {
   margin: 0;
   background: var(--ground);

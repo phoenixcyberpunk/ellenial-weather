@@ -109,7 +109,6 @@
 
   var weeksEl = document.getElementById("weeks");
   var selected = {}; // open day per week (0, 1, 2): its date string
-  var tapped = null;  // the day button just tapped, so focus and scroll can follow it
   var observedSlow = false;
 
   function cell(content, cls) {
@@ -168,6 +167,27 @@
       var thead = el("thead"), hr = el("tr");
       var classes = week.map(function (d) { return d.today ? "today-col" : d.past ? "past" : d.empty ? "beyond" : ""; });
 
+      var ths = [], btns = [], cols = week.map(function () { return []; });
+      var slot = el("div", "day-hours-slot"); // where the open day's hours go
+
+      // Open or close a day in place: nothing is rebuilt, so the tapped button stays put.
+      function setOpen(date, how) {
+        open = date;
+        selected[w] = date;
+        week.forEach(function (d, i) {
+          var on = open === d.date;
+          btns[i].setAttribute("aria-pressed", on ? "true" : "false");
+          ths[i].classList.toggle("picked", on);
+          cols[i].forEach(function (td) { td.classList.toggle("picked", on); });
+        });
+        slot.textContent = "";
+        var pickNow = week.filter(function (d) { return d.date === open && !d.empty; })[0];
+        if (pickNow && pickNow.hours) {
+          slot.appendChild(hourPanel(pickNow));
+          if (how) showWhole(slot);
+        }
+      }
+
       week.forEach(function (d, i) {
         var th = el("th"); th.scope = "col";
         var dd = parseDate(d.date);
@@ -178,15 +198,13 @@
         btn.setAttribute("aria-label", FULL[i] + " " + dd.getUTCDate() + (d.empty ? "" : ", show hours"));
         btn.appendChild(el("span", "dow", DOW[i]));
         btn.appendChild(el("span", "date", String(dd.getUTCDate())));
-        btn.addEventListener("click", function (e) {
-          selected[w] = open === d.date ? null : d.date;
-          // e.detail is 0 for keyboard presses, 1+ for taps and clicks
-          tapped = { week: w, day: i, opened: !!selected[w], keyboard: e.detail === 0 };
-          renderWeeks(days, observedAt);
+        btn.addEventListener("click", function () {
+          setOpen(open === d.date ? null : d.date, "tap");
         });
         th.className = (d.today ? "today" : d.past ? "past" : "") + (open === d.date ? " picked" : "");
         th.appendChild(btn);
         hr.appendChild(th);
+        ths.push(th); btns.push(btn);
       });
       thead.appendChild(hr);
       table.appendChild(thead);
@@ -201,6 +219,7 @@
           var td = d.empty ? cell("–", cls) : cell(fn(d), cls);
           td.setAttribute("aria-label", d.empty ? label + ": no forecast yet" : label + ": " + spoken(d));
           tr.appendChild(td);
+          cols[i].push(td);
         });
         tbody.appendChild(tr);
       }
@@ -237,8 +256,8 @@
       legend.appendChild(document.createTextNode(" how sure"));
       card.appendChild(legend);
 
-      var pick = week.filter(function (d) { return d.date === open && !d.empty; })[0];
-      if (pick && pick.hours) card.appendChild(hourPanel(pick));
+      card.appendChild(slot);
+      setOpen(open, null); // restore an open day after new data arrives, without scrolling
 
       if (w === 0 && week.some(function (d) { return d.past && !d.empty; })) {
         card.appendChild(el("p", "week-note", observedAt
@@ -249,25 +268,13 @@
       }
       weeksEl.appendChild(card);
     });
-    followTap();
   }
 
-  // The tables are rebuilt on every tap. If a day just opened, jump only as far as needed
-  // to show its hours in full. This is an instant jump on purpose: on iPhone, a smooth
-  // programmatic scroll can leave taps landing in the wrong place until you scroll by hand.
-  // Focus goes back to the day only for keyboard users (taps on a phone don't need it).
-  function followTap() {
-    if (!tapped) return;
-    var t = tapped; tapped = null;
-    var card = weeksEl.children[t.week];
-    if (!card) return;
-    if (t.keyboard) {
-      var btn = card.querySelectorAll(".day-btn")[t.day];
-      if (btn) btn.focus({ preventScroll: true });
-    }
-    var panel = t.opened && card.querySelector(".day-hours");
-    if (!panel) return;
-    var r = panel.getBoundingClientRect();
+  // Jump only as far as needed to show a just-opened day's hours in full. An instant jump
+  // on purpose: on iPhone, a smooth programmatic scroll can leave taps landing in the wrong
+  // place until you scroll by hand.
+  function showWhole(node) {
+    var r = node.getBoundingClientRect();
     var below = r.bottom - (window.innerHeight - 12);
     if (below > 0) window.scrollBy(0, Math.min(below, Math.max(0, r.top - 12)));
   }
