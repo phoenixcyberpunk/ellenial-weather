@@ -109,6 +109,7 @@
 
   var weeksEl = document.getElementById("weeks");
   var selected = {}; // open day per week (0, 1, 2): its date string
+  var tapped = null;  // the day button just tapped, so focus and scroll can follow it
 
   function cell(content, cls) {
     var td = document.createElement("td");
@@ -178,6 +179,7 @@
         btn.appendChild(el("span", "date", String(dd.getUTCDate())));
         btn.addEventListener("click", function () {
           selected[w] = open === d.date ? null : d.date;
+          tapped = { week: w, day: i, opened: !!selected[w] };
           renderWeeks(days, observedAt);
         });
         th.className = (d.today ? "today" : d.past ? "past" : "") + (open === d.date ? " picked" : "");
@@ -242,6 +244,24 @@
           : "Past days: from the forecasts' own records, no weather station nearby."));
       }
       weeksEl.appendChild(card);
+    });
+    followTap();
+  }
+
+  // The tables are rebuilt on every tap: put focus back on the tapped day, and if
+  // a day just opened, scroll only as far as needed to show its hours in full.
+  function followTap() {
+    if (!tapped) return;
+    var t = tapped; tapped = null;
+    var card = weeksEl.children[t.week];
+    if (!card) return;
+    var btn = card.querySelectorAll(".day-btn")[t.day];
+    if (btn) btn.focus({ preventScroll: true });
+    var panel = t.opened && card.querySelector(".day-hours");
+    if (!panel) return;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(function () {
+      panel.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
     });
   }
 
