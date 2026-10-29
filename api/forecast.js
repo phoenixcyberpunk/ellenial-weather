@@ -1,17 +1,34 @@
 // GET /api/forecast?lat=57.71&lon=11.97
-// Fetches every source at once and combines them per hour. A source that fails just drops out.
-// Cached at Vercel's edge for 30 minutes, so most visitors never reach the sources at all.
+// Fetches every source at once and combines them per hour and per day.
+// A source that fails just drops out. Cached at Vercel's edge for 30 minutes,
+// so most visitors never reach the sources at all.
 
 const smhi = require("../lib/sources/smhi");
 const met = require("../lib/sources/met");
 const openMeteo = require("../lib/sources/openmeteo");
+const smhiObserved = require("../lib/sources/smhiObs");
 const { combine } = require("../lib/combine");
+const { buildDays, localClock } = require("../lib/days");
 
-const GOTHENBURG = { name: "Gothenburg", lat: 57.71, lon: 11.97 };
+const HOUR = 3600 * 1000;
+const GOTHENBURG = { lat: 57.71, lon: 11.97 };
+const FALLBACK_TZ = "Europe/Stockholm";
 
 function parseCoord(value, min, max) {
   const n = Number(value);
   return Number.isFinite(n) && n >= min && n <= max ? Math.round(n * 100) / 100 : null;
+}
+
+const reason = (r) => String((r.reason && r.reason.message) || r.reason);
+
+// The page needs hour-level detail only for today and the next two days.
+function hoursForPage(hours, tz, now) {
+  const clock = localClock(tz);
+  const today = clock(now).date;
+  const end = now + 48 * HOUR;
+  return hours
+    .filter((h) => h.t <= end && (h.t >= now - HOUR || clock(h.t).date === today))
+    .map(({ tempBySource, ...rest }) => rest);
 }
 
 module.exports = async (req, res) => {
@@ -24,11 +41,13 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: "lat and lon must be numbers" }));
   }
 
-  const [smhiRes, metRes, omRes] = await Promise.allSettled([smhi(lat, lon), met(lat, lon), openMeteo(lat, lon)]);
+  const [smhiRes, metRes, omRes, obsRes] = await Promise.allSettled([
+    smhi(lat, lon), met(lat, lon), openMeteo(lat, lon), smhiObserved(lat, lon)
+  ]);
 
   const sources = [];
   const status = [];
-  const note = (id, name, r) => status.push({ id, name, ok: r.status === "fulfilled", error: r.status === "rejected" ? String(r.reason && r.reason.message || r.reason) : undefined });
+  const note = (id, name, r) => status.push({ id, name, ok: r.status === "fulfilled", error: r.status === "rejected" ? reason(r) : undefined });
 
   note("smhi", "SMHI", smhiRes);
   if (smhiRes.status === "fulfilled") sources.push(smhiRes.value);
@@ -44,7 +63,7 @@ module.exports = async (req, res) => {
     }
   } else {
     for (const [id, name] of [["ecmwf", "ECMWF"], ["icon", "DWD ICON"], ["dmi", "DMI"], ["gfs", "NOAA GFS"]]) {
-      status.push({ id, name, ok: false, error: String(omRes.reason && omRes.reason.message || omRes.reason) });
+      status.push({ id, name, ok: false, error: reason(omRes) });
     }
   }
 
@@ -55,11 +74,19 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: "No forecasts could be reached", sources: status }));
   }
 
+  const tz = timezone || FALLBACK_TZ;
+  const now = Date.now();
+  const hours = combine(sources, lat, lon);
+  const observed = obsRes.status === "fulfilled" ? obsRes.value : null;
+
   const body = {
-    place: { lat, lon, timezone: timezone || "Europe/Stockholm" },
-    generatedAt: new Date().toISOString(),
+    place: { lat, lon, timezone: tz },
+    generatedAt: new Date(now).toISOString(),
     sources: status,
-    hours: combine(sources, lat, lon)
+    observedAt: observed ? observed.station : null,
+    observedError: obsRes.status === "rejected" ? reason(obsRes) : undefined,
+    hours: hoursForPage(hours, tz, now),
+    days: buildDays(hours, observed, tz, now)
   };
 
   res.setHeader("Cache-Control", "public, s-maxage=1800, stale-while-revalidate=3600");

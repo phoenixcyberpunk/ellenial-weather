@@ -7,8 +7,7 @@
   var DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   var FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  var ROWS = ["Weather", "Temp °C", "Rain mm", "Wind m/s", "How sure"];
-
+  
   // ---- Tabs -------------------------------------------------------------
   var tabs = {
     forecast: { tab: document.getElementById("tab-forecast"), view: document.getElementById("view-forecast") },
@@ -82,98 +81,161 @@
   }));
 
   // ---- Week tables (this week, next week, the week after) ----------------
+  // Mon–Sun across the top, one row per measure. Past days show what was measured
+  // (greyed), today is highlighted, days beyond the forecasts show a dash.
+  // Tapping a day shows it hour by hour under that week.
   function isoWeek(d) {
-    var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
     var day = t.getUTCDay() || 7;
     t.setUTCDate(t.getUTCDate() + 4 - day);
     var yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
     return Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
   }
+  function parseDate(s) { var p = s.split("-"); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
 
-  var monday = new Date(today);
-  monday.setDate(today.getDate() - dowIndex);
+  // Placeholder days from the visitor's own clock, until the forecast arrives.
+  function placeholderDays() {
+    var mon = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate() - dowIndex));
+    var todayIso = today.getFullYear() + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
+    var out = [];
+    for (var i = 0; i < 21; i++) {
+      var d = new Date(mon); d.setUTCDate(mon.getUTCDate() + i);
+      var iso = d.toISOString().slice(0, 10);
+      out.push({ date: iso, past: iso < todayIso, today: iso === todayIso, empty: true });
+    }
+    return out;
+  }
 
   var weeksEl = document.getElementById("weeks");
-  ["This week", "Next week", "In two weeks"].forEach(function (title, w) {
-    var start = new Date(monday);
-    start.setDate(monday.getDate() + w * 7);
-    var end = new Date(start);
-    end.setDate(start.getDate() + 6);
+  var selected = null; // date string of the tapped day
 
-    var card = document.createElement("article");
-    card.className = "card tight";
+  function cell(content, cls) {
+    var td = document.createElement("td");
+    if (cls) td.className = cls;
+    if (typeof content === "string") td.textContent = content;
+    else if (content) td.appendChild(content);
+    return td;
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
 
-    var head = document.createElement("div");
-    head.className = "week-head";
-    var h2 = document.createElement("h2");
-    h2.className = "title";
-    h2.textContent = title;
-    var dates = document.createElement("span");
-    dates.className = "week-dates";
-    dates.textContent = "v" + isoWeek(start) + " · " + start.getDate() + " " + MONTHS[start.getMonth()] +
-      "–" + end.getDate() + " " + MONTHS[end.getMonth()];
-    head.appendChild(h2);
-    head.appendChild(dates);
-    card.appendChild(head);
-
-    var table = document.createElement("table");
-    table.className = "week";
-    var caption = document.createElement("caption");
-    caption.className = "visually-hidden";
-    caption.hidden = true;
-    caption.textContent = title;
-    table.appendChild(caption);
-
-    var thead = document.createElement("thead");
-    var hr = document.createElement("tr");
-    var corner = document.createElement("th");
-    corner.className = "row-label";
-    corner.setAttribute("aria-hidden", "true");
-    hr.appendChild(corner);
-
-    var cols = [];
-    for (var i = 0; i < 7; i++) {
-      var day = new Date(start);
-      day.setDate(start.getDate() + i);
-      var isToday = day.getTime() === today.getTime();
-      var isPast = day < today;
-      cols.push({ isToday: isToday, isPast: isPast });
-
-      var th = document.createElement("th");
-      th.scope = "col";
-      th.setAttribute("aria-label", FULL[i] + " " + day.getDate());
-      if (isToday) th.className = "today";
-      else if (isPast) th.className = "past";
-      th.innerHTML = '<span class="dow"></span><span class="date"></span>';
-      th.querySelector(".dow").textContent = DOW[i];
-      th.querySelector(".date").textContent = day.getDate();
-      hr.appendChild(th);
-    }
-    thead.appendChild(hr);
-    table.appendChild(thead);
-
-    var tbody = document.createElement("tbody");
-    ROWS.forEach(function (label) {
-      var tr = document.createElement("tr");
-      var rh = document.createElement("th");
-      rh.scope = "row";
-      rh.className = "row-label";
-      rh.textContent = label;
-      tr.appendChild(rh);
-      cols.forEach(function (c) {
-        var td = document.createElement("td");
-        td.textContent = "–";
-        if (c.isToday) td.className = "today-col";
-        else if (c.isPast) td.className = "past";
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
+  function hourPanel(day) {
+    var panel = el("div", "day-hours");
+    var d = parseDate(day.date);
+    panel.appendChild(el("p", "day-hours-title", FULL[(d.getUTCDay() + 6) % 7] + " " + d.getUTCDate() + ", hour by hour"));
+    var grid = el("div", "day-hours-grid");
+    day.hours.forEach(function (h) {
+      var box = el("div", "hour");
+      box.appendChild(el("span", "hour-time", pad(h.hour)));
+      var w = el("span", "hour-word", h.temp === null ? "–" : h.word);
+      if (h.temp !== null) w.setAttribute("data-w", h.word);
+      box.appendChild(w);
+      box.appendChild(el("span", "hour-temp", h.temp === null ? "–" : Math.round(h.temp) + "°"));
+      var r = el("span", "hour-small hour-rain", h.mm === null || h.mm === undefined ? "– mm" : (h.mm >= 0.1 ? h.mm : 0) + " mm");
+      if (h.mm >= 1) r.classList.add("wet");
+      box.appendChild(r);
+      box.appendChild(el("span", "hour-small", h.wind === null || h.wind === undefined ? "– m/s" : h.wind + " m/s"));
+      grid.appendChild(box);
     });
-    table.appendChild(tbody);
+    panel.appendChild(grid);
+    return panel;
+  }
 
-    card.appendChild(table);
-    weeksEl.appendChild(card);
-  });
+  function renderWeeks(days, observedAt) {
+    weeksEl.textContent = "";
+    ["This week", "Next week", "In two weeks"].forEach(function (title, w) {
+      var week = days.slice(w * 7, w * 7 + 7);
+      var start = parseDate(week[0].date), end = parseDate(week[6].date);
+
+      var card = el("article", "card tight");
+      var head = el("div", "week-head");
+      head.appendChild(el("h2", "title", title));
+      head.appendChild(el("span", "week-dates", "v" + isoWeek(start) + " · " + start.getUTCDate() + " " + MONTHS[start.getUTCMonth()] +
+        "–" + end.getUTCDate() + " " + MONTHS[end.getUTCMonth()]));
+      card.appendChild(head);
+
+      var table = el("table", "week");
+      var cap = el("caption", "sr-only", title);
+      table.appendChild(cap);
+      var thead = el("thead"), hr = el("tr");
+      var corner = el("th", "row-label"); corner.setAttribute("aria-hidden", "true");
+      hr.appendChild(corner);
+      var classes = week.map(function (d) { return d.today ? "today-col" : d.past ? "past" : d.empty ? "beyond" : ""; });
+
+      week.forEach(function (d, i) {
+        var th = el("th"); th.scope = "col";
+        var dd = parseDate(d.date);
+        var btn = el("button", "day-btn");
+        btn.type = "button";
+        btn.disabled = !!d.empty;
+        btn.setAttribute("aria-pressed", selected === d.date ? "true" : "false");
+        btn.setAttribute("aria-label", FULL[i] + " " + dd.getUTCDate() + (d.empty ? "" : ", show hours"));
+        btn.appendChild(el("span", "dow", DOW[i]));
+        btn.appendChild(el("span", "date", String(dd.getUTCDate())));
+        btn.addEventListener("click", function () {
+          selected = selected === d.date ? null : d.date;
+          renderWeeks(days, observedAt);
+        });
+        th.className = (d.today ? "today" : d.past ? "past" : "") + (selected === d.date ? " picked" : "");
+        th.appendChild(btn);
+        hr.appendChild(th);
+      });
+      thead.appendChild(hr);
+      table.appendChild(thead);
+
+      var tbody = el("tbody");
+      function row(label, fn) {
+        var tr = el("tr");
+        var rh = el("th", "row-label", label); rh.scope = "row";
+        tr.appendChild(rh);
+        week.forEach(function (d, i) {
+          var cls = classes[i] + (selected === d.date ? " picked" : "");
+          tr.appendChild(d.empty ? cell("–", cls) : cell(fn(d), cls));
+        });
+        tbody.appendChild(tr);
+      }
+      row("Weather", function (d) { var c = el("span", "week-word", d.word); c.setAttribute("data-w", d.word); return c; });
+      row("Temp °C", function (d) {
+        var f = document.createDocumentFragment();
+        f.appendChild(el("span", "week-hi", Math.round(d.hi) + "°"));
+        f.appendChild(el("span", "week-lo", Math.round(d.lo) + "°"));
+        return f;
+      });
+      row("Rain mm", function (d) {
+        if (d.mm === null || d.mm === undefined) return "–";
+        var s = el("span", d.mm >= 1 ? "wet" : "", String(d.mm >= 0.1 ? (d.mm >= 10 ? Math.round(d.mm) : d.mm) : 0));
+        return s;
+      });
+      row("Wind m/s", function (d) { return d.wind === null ? "–" : String(d.wind); });
+      row("How sure", function (d) {
+        if (d.sure === null || d.sure === undefined) return ""; // past days: the note under the table says where they come from
+        var s = el("span", "sure");
+        s.setAttribute("aria-label", ["", "less sure", "fairly sure", "sure"][d.sure]);
+        s.appendChild(el("span", "sure-on", "●".repeat(d.sure)));
+        s.appendChild(el("span", "sure-off", "●".repeat(3 - d.sure)));
+        return s;
+      });
+      table.appendChild(tbody);
+      card.appendChild(table);
+
+      var pick = week.filter(function (d) { return d.date === selected && !d.empty; })[0];
+      if (pick && pick.hours) card.appendChild(hourPanel(pick));
+
+      if (w === 0 && week.some(function (d) { return d.past && !d.empty; })) {
+        card.appendChild(el("p", "week-note", observedAt
+          ? "Past days: measured at SMHI " + observedAt.name + "."
+          : "Past days: from the forecasts' own records, no weather station nearby."));
+      }
+      weeksEl.appendChild(card);
+    });
+  }
+
+  renderWeeks(placeholderDays(), null);
 
   // ---- Forecast: right now, today hour by hour, the rain line -----------
   var HOUR = 3600 * 1000;
@@ -259,9 +321,10 @@
     nowCard.line.textContent = (WORDS[now.word] || "Mixed") + " and " + feel(now.temp) +
       (now.wind !== null ? " · " + now.wind + "\u00a0m/s" : "");
 
-    var today = hours.filter(function (h) { return clock(h.t).day === local.day; });
-    var temps = today.map(function (h) { return h.temp; });
-    var ahead = today.filter(function (h) { return h.t >= slot; });
+    var todayHours = hours.filter(function (h) { return clock(h.t).day === local.day; });
+    var todayDay = (data.days || []).filter(function (d) { return d.today && !d.empty; })[0];
+    var temps = todayDay ? [todayDay.hi, todayDay.lo] : todayHours.map(function (h) { return h.temp; });
+    var ahead = todayHours.filter(function (h) { return h.t >= slot; });
     var sure = ahead.length ? ahead.reduce(function (a, h) { return a + h.sure; }, 0) / ahead.length : now.sure;
     var agree = sure >= 2.5 ? "forecasts agree" : sure >= 1.5 ? "forecasts mostly agree" : "forecasts differ";
     nowCard.sub.textContent = temps.length
@@ -319,6 +382,8 @@
     document.getElementById("rain-text").textContent = seeing
       ? seeing + " of " + counted + " forecasts see rain " + when + ", about " + (Math.round(totalMm * 2) / 2 || 0.5) + " mm in total."
       : "None of the " + counted + " forecasts see rain " + when + ".";
+
+    if (data.days && data.days.length === 21) renderWeeks(data.days, data.observedAt);
 
     var okCount = data.sources.filter(function (s) { return s.ok; }).length;
     document.getElementById("source-count").textContent = "Combined from " + okCount + " forecasts. ";
