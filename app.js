@@ -110,6 +110,7 @@
   var weeksEl = document.getElementById("weeks");
   var selected = {}; // open day per week (0, 1, 2): its date string
   var tapped = null;  // the day button just tapped, so focus and scroll can follow it
+  var observedSlow = false;
 
   function cell(content, cls) {
     var td = document.createElement("td");
@@ -241,7 +242,9 @@
       if (w === 0 && week.some(function (d) { return d.past && !d.empty; })) {
         card.appendChild(el("p", "week-note", observedAt
           ? "Past days: measured at SMHI " + observedAt.name + "."
-          : "Past days: from the forecasts' own records, no weather station nearby."));
+          : observedSlow
+            ? "Past days: SMHI's station data was slow to answer, so these come from the forecasts' own records for now."
+            : "Past days: from the forecasts' own records, no weather station nearby."));
       }
       weeksEl.appendChild(card);
     });
@@ -413,6 +416,8 @@
       ? seeing + " of " + counted + " forecasts see rain " + when + ", about " + (Math.round(totalMm * 2) / 2 || 0.5) + " mm in total."
       : "None of the " + counted + " forecasts see rain " + when + ".";
 
+    document.getElementById("loading").hidden = true;
+    observedSlow = !!data.observedSlow;
     if (data.days && data.days.length === 21) renderWeeks(data.days, data.observedAt);
 
     var okCount = data.sources.filter(function (s) { return s.ok; }).length;
@@ -422,6 +427,7 @@
   function fail() {
     nowCard.line.textContent = "The forecasts couldn't be reached";
     nowCard.sub.textContent = "Try again in a little while.";
+    document.getElementById("loading").textContent = "The forecasts couldn't be reached. Try again in a little while.";
   }
 
   fetch("/api/forecast?lat=" + PLACE.lat + "&lon=" + PLACE.lon)

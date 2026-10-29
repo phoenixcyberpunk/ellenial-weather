@@ -32,6 +32,7 @@ function hoursForPage(hours, tz, now) {
 }
 
 module.exports = async (req, res) => {
+  const started = Date.now();
   const url = new URL(req.url, "http://local");
   const lat = parseCoord(url.searchParams.get("lat") ?? GOTHENBURG.lat, -90, 90);
   const lon = parseCoord(url.searchParams.get("lon") ?? GOTHENBURG.lon, -180, 180);
@@ -77,18 +78,25 @@ module.exports = async (req, res) => {
   const tz = timezone || FALLBACK_TZ;
   const now = Date.now();
   const hours = combine(sources, lat, lon);
-  const observed = obsRes.status === "fulfilled" ? obsRes.value : null;
+  const obsValue = obsRes.status === "fulfilled" ? obsRes.value : null;
+  const observed = obsValue && obsValue.hours ? obsValue : null;
+  const observedSlow = !!(obsValue && obsValue.timedOut) || obsRes.status === "rejected";
 
   const body = {
     place: { lat, lon, timezone: tz },
     generatedAt: new Date(now).toISOString(),
     sources: status,
     observedAt: observed ? observed.station : null,
+    observedSlow,
     observedError: obsRes.status === "rejected" ? reason(obsRes) : undefined,
     hours: hoursForPage(hours, tz, now),
-    days: buildDays(hours, observed, tz, now)
+    days: buildDays(hours, observed, tz, now),
+    tookMs: Date.now() - started // how long the sources took, for keeping an eye on speed
   };
 
-  res.setHeader("Cache-Control", "public, s-maxage=1800, stale-while-revalidate=3600");
+  // Missing station data shouldn't stick around for half an hour: try again sooner.
+  res.setHeader("Cache-Control", observedSlow
+    ? "public, s-maxage=300, stale-while-revalidate=600"
+    : "public, s-maxage=1800, stale-while-revalidate=3600");
   res.end(JSON.stringify(body));
 };
