@@ -67,6 +67,7 @@
       var spans = div.querySelectorAll("span");
       spans[0].textContent = c.time;
       spans[1].textContent = c.word;
+      spans[1].setAttribute("data-w", c.word);
       spans[2].textContent = c.temp;
       spans[3].textContent = c.rain;
       if (c.wet) spans[3].classList.add("wet");
@@ -254,8 +255,9 @@
     // Right now
     nowCard.temp.textContent = deg(now.temp);
     nowCard.chip.textContent = now.word;
+    nowCard.chip.setAttribute("data-w", now.word);
     nowCard.line.textContent = (WORDS[now.word] || "Mixed") + " and " + feel(now.temp) +
-      (now.wind !== null ? " · " + now.wind + " m/s" : "");
+      (now.wind !== null ? " · " + now.wind + "\u00a0m/s" : "");
 
     var today = hours.filter(function (h) { return clock(h.t).day === local.day; });
     var temps = today.map(function (h) { return h.temp; });

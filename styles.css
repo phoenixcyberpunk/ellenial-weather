@@ -1,51 +1,74 @@
-/* Ellenial Weather — styles. Colours and type follow the design sketch. */
+/* Ellenial Weather — styles.
+   Colours from Ellen's flower (same palette as Gillefeeling): cream paper, indigo accent,
+   lavender tints, Fraunces + DM Sans. Weather words get Gillefeeling's soft cover tints;
+   the word always carries the meaning, the tint only helps scanning. */
 
 @font-face { font-family: "Fraunces"; font-weight: 400; font-display: swap; src: url("fonts/fraunces-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Fraunces"; font-weight: 600; font-display: swap; src: url("fonts/fraunces-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 400; font-display: swap; src: url("fonts/nunito-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 600; font-display: swap; src: url("fonts/nunito-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 700; font-display: swap; src: url("fonts/nunito-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "Nunito"; font-weight: 800; font-display: swap; src: url("fonts/nunito-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 500; font-display: swap; src: url("fonts/fraunces-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 400; font-display: swap; src: url("fonts/dm-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 500; font-display: swap; src: url("fonts/dm-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 600; font-display: swap; src: url("fonts/dm-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 700; font-display: swap; src: url("fonts/dm-sans-latin-700-normal.woff2") format("woff2"); }
 
 :root {
-  --ground: #EEF3F6;
-  --card: #FFFFFF;
-  --soft: #F4F7F9;
-  --ink: #22313D;
-  --muted: #52646F;
-  --faint: #8796A0;
-  --line: #E4EBF0;
-  --line-strong: #C9D6DF;
-  --tab-bg: #DCE5EB;
-  --chip: #DCE8F0;
-  --chip-ink: #24405A;
-  --accent: #3B5A78;
-  --accent-hover: #24405A;
+  --ground: #FEF2E2;      /* cream paper */
+  --card: #FFFBF5;
+  --soft: #F1EAF8;        /* lavender tint */
+  --head: #F8F0E6;
+  --ink: #1F1A2E;
+  --muted: #575166;
+  --faint: #6A6476;
+  --line: #EDE1D1;
+  --line-strong: #D6C8B6;
+  --tab-bg: #E6DDF3;
+  --chip: #E6DDF3;
+  --chip-ink: #1F1A2E;
+  --accent: #342E86;      /* indigo */
+  --accent-ink: #FFFFFF;
+  --accent-hover: #2A2570;
+  --lavender: #8E63B3;
   --note: #FFF7E6;
   --note-ink: #5C4310;
   --uv-mid: #F6E3A8;
   --uv-high: #F0B77E;
+  /* weather word tints (Gillefeeling cover presets) */
+  --w-sun: #F3E3B5;
+  --w-mix: #F2D6C4;
+  --w-cloudy: #DDD6EC;
+  --w-rain: #D3E2EC;
+  --w-wind: #D5E3D6;
+  --w-snow: #EEF1F7;
   --serif: "Fraunces", Georgia, serif;
-  --sans: "Nunito", system-ui, sans-serif;
+  --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground: #141B21;
-    --card: #1D262D;
-    --soft: #242F37;
-    --ink: #E6EDF2;
-    --muted: #A3B2BC;
-    --faint: #7D8C96;
-    --line: #2E3A43;
-    --line-strong: #3C4A54;
-    --tab-bg: #2A353D;
-    --chip: #2C3F50;
-    --chip-ink: #CFE0EE;
-    --accent: #8FB4D6;
-    --accent-hover: #B5CFE6;
+    --ground: #17141F;
+    --card: #221E2C;
+    --soft: #2D2640;
+    --head: #262130;
+    --ink: #F3EEF8;
+    --muted: #C2BACF;
+    --faint: #A9A1B7;
+    --line: #332D40;
+    --line-strong: #4A4259;
+    --tab-bg: #2D2640;
+    --chip: #3A3052;
+    --chip-ink: #F3EEF8;
+    --accent: #B39AE8;
+    --accent-ink: #1A1430;
+    --accent-hover: #C7B4F0;
     --note: #3A3020;
     --note-ink: #F0DDB4;
+    --w-sun: #4A4128;
+    --w-mix: #4A362B;
+    --w-cloudy: #3C3749;
+    --w-rain: #2E3E48;
+    --w-wind: #31423A;
+    --w-snow: #3A3F4C;
+    color-scheme: dark;
   }
 }
 
@@ -73,7 +96,7 @@ a:hover { color: var(--accent-hover); }
 
 /* Header */
 .top { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
-.brand { font-family: var(--serif); font-size: 18px; font-weight: 600; margin: 0; }
+.brand { font-family: var(--serif); font-size: 18px; font-weight: 500; margin: 0; }
 .place {
   font: inherit; font-size: 14px; font-weight: 600; color: var(--ink);
   background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px;
@@ -85,17 +108,17 @@ a:hover { color: var(--accent-hover); }
 .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--tab-bg); border-radius: 999px; padding: 4px; }
 .tab {
   min-height: 44px; border: 0; border-radius: 999px; background: transparent;
-  font: inherit; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; padding: 0 8px;
 }
-.tab[aria-selected="true"] { background: var(--card); color: var(--ink); font-weight: 800; }
+.tab[aria-selected="true"] { background: var(--card); color: var(--ink); font-weight: 700; }
 .tab:focus-visible, .place:focus-visible, .rain-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 /* Cards */
 .card { background: var(--card); border-radius: 24px; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; }
 .card.tight { padding: 18px 12px 16px; gap: 10px; }
 .label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 0; }
-.title { font-family: var(--serif); font-size: 20px; font-weight: 600; margin: 0; }
-.chip { align-self: flex-start; font-size: 12px; font-weight: 800; background: var(--chip); color: var(--chip-ink); border-radius: 8px; padding: 4px 10px; }
+.title { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0; }
+.chip { align-self: flex-start; font-size: 12px; font-weight: 700; background: var(--chip); color: var(--chip-ink); border-radius: 8px; padding: 4px 10px; }
 .muted { color: var(--muted); }
 
 /* Right now */
@@ -111,14 +134,23 @@ a:hover { color: var(--accent-hover); }
 .hour-temp { font-family: var(--serif); font-size: 18px; }
 .hour-small { font-size: 11px; color: var(--muted); }
 
-.hour-word { font-size: 9px; font-weight: 800; color: var(--chip-ink); background: var(--chip); border-radius: 5px; padding: 2px 4px; }
-.hour-rain.wet { color: var(--accent); font-weight: 800; }
+.hour-word { font-size: 9px; font-weight: 700; color: var(--chip-ink); background: var(--chip); border-radius: 5px; padding: 2px 4px; }
+.hour-rain.wet { color: var(--accent); font-weight: 700; }
 
 .rain { border-top: 1px solid var(--line); padding-top: 4px; }
 .rain-detail { display: flex; flex-direction: column; gap: 8px; padding: 4px 2px 6px; }
 .rain-dots { display: flex; gap: 6px; }
 .rain-dot { width: 22px; height: 22px; border-radius: 11px; border: 2px solid var(--accent); }
 .rain-dot.on { background: var(--accent); }
+
+/* Weather words, tinted by kind */
+.chip, .hour-word { color: var(--chip-ink); }
+[data-w="SUN"], [data-w="CLEAR"] { background: var(--w-sun); }
+[data-w="MIX"] { background: var(--w-mix); }
+[data-w="CLOUDY"] { background: var(--w-cloudy); }
+[data-w="RAIN"] { background: var(--w-rain); }
+[data-w="WIND"] { background: var(--w-wind); }
+[data-w="SNOW"] { background: var(--w-snow); }
 .rain-text { margin: 0; font-size: 14px; }
 .rain-toggle {
   width: 100%; min-height: 44px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
@@ -130,11 +162,11 @@ a:hover { color: var(--accent-hover); }
 .week-dates { font-size: 13px; color: var(--muted); }
 .week { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--tab-bg); border-radius: 12px; overflow: hidden; }
 .week th, .week td { border-left: 1px solid var(--line); border-top: 1px solid var(--line); text-align: center; padding: 6px 0; font-size: 12px; }
-.week thead th { border-top: 0; background: var(--soft); min-height: 44px; }
+.week thead th { border-top: 0; background: var(--head); min-height: 44px; }
 .week th.row-label { width: 46px; border-left: 0; font-size: 10px; font-weight: 700; color: var(--muted); text-align: left; padding: 0 4px 0 6px; line-height: 1.15; }
-.week .dow { display: block; font-size: 12px; font-weight: 800; }
+.week .dow { display: block; font-size: 12px; font-weight: 700; }
 .week .date { display: block; font-size: 11px; font-weight: 600; }
-.week .today { background: var(--accent); color: var(--card); }
+.week .today { background: var(--accent); color: var(--accent-ink); }
 .week td.today-col { background: var(--ground); }
 .week .past { opacity: 0.5; }
 .week td { color: var(--faint); }
