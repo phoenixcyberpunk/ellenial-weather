@@ -50,4 +50,4 @@ Tests: `node --test`.
 
 ## Licence
 
-Code: MIT, see `LICENSE`.
+AGPL-3.0, same as the [Ellenial site](https://github.com/phoenixcyberpunk/ellenial). See `LICENSE`.
