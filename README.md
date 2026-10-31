@@ -49,7 +49,7 @@ Tests: `node --test`.
 
 ## Fonts
 
-[Fraunces](https://github.com/undercasetype/Fraunces) and [DM Sans](https://github.com/googlefonts/dm-fonts), SIL Open Font License 1.1 (licences in `fonts/`).
+[Fraunces](https://github.com/undercasetype/Fraunces) and [Instrument Sans](https://github.com/Instrument/instrument-sans), SIL Open Font License 1.1 (licences in `fonts/`).
 
 ## Licence
 

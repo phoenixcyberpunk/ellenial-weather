@@ -1,14 +1,14 @@
 /* Ellenial Weather — styles.
    Colours from Ellen's flower (same palette as Gillefeeling): cream paper, indigo accent,
-   lavender tints, Fraunces + DM Sans. Weather words get Gillefeeling's soft cover tints;
+   lavender tints, Fraunces + Instrument Sans. Weather words get Gillefeeling's soft cover tints;
    the word always carries the meaning, the tint only helps scanning. */
 
 @font-face { font-family: "Fraunces"; font-weight: 400; font-display: swap; src: url("fonts/fraunces-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Fraunces"; font-weight: 500; font-display: swap; src: url("fonts/fraunces-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "DM Sans"; font-weight: 400; font-display: swap; src: url("fonts/dm-sans-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "DM Sans"; font-weight: 500; font-display: swap; src: url("fonts/dm-sans-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "DM Sans"; font-weight: 600; font-display: swap; src: url("fonts/dm-sans-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "DM Sans"; font-weight: 700; font-display: swap; src: url("fonts/dm-sans-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Instrument Sans"; font-weight: 400; font-display: swap; src: url("fonts/instrument-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Instrument Sans"; font-weight: 500; font-display: swap; src: url("fonts/instrument-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Instrument Sans"; font-weight: 600; font-display: swap; src: url("fonts/instrument-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Instrument Sans"; font-weight: 700; font-display: swap; src: url("fonts/instrument-sans-latin-700-normal.woff2") format("woff2"); }
 
 :root {
   --ground: #FEF2E2;      /* cream paper */
@@ -39,7 +39,7 @@
   --w-wind: #D5E3D6;
   --w-snow: #EEF1F7;
   --serif: "Fraunces", Georgia, serif;
-  --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 
