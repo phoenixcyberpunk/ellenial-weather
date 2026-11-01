@@ -1,74 +1,44 @@
 /* Ellenial Weather — styles.
-   Colours from Ellen's flower (same palette as Gillefeeling): cream paper, indigo accent,
-   lavender tints, Fraunces + Instrument Sans. Weather words get Gillefeeling's soft cover tints;
+   The Ellenial brand (final, 1 Nov 2026): one palette and Fraunces + DM Sans for ellenial.app and every
+   app, with Auto / Light / Dark from the shared ellenial-theme.js (same file as ellenial maps).
+   Accessibility rules: never colour alone, text 4.5:1, controls and icons 3:1.
+   --line is decorative only; anything you can tap gets --edge (3:1 or more).
+   --peri (Periwinkle) is a fill for selected and active things, never text.
+   Weather words keep soft semantic tints (sun yellow, rain blue…), like green/red elsewhere:
    the word always carries the meaning, the tint only helps scanning. */
 
 @font-face { font-family: "Fraunces"; font-weight: 400; font-display: swap; src: url("fonts/fraunces-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Fraunces"; font-weight: 500; font-display: swap; src: url("fonts/fraunces-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "Instrument Sans"; font-weight: 400; font-display: swap; src: url("fonts/instrument-sans-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Instrument Sans"; font-weight: 500; font-display: swap; src: url("fonts/instrument-sans-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "Instrument Sans"; font-weight: 600; font-display: swap; src: url("fonts/instrument-sans-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Instrument Sans"; font-weight: 700; font-display: swap; src: url("fonts/instrument-sans-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 400; font-display: swap; src: url("fonts/dm-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 500; font-display: swap; src: url("fonts/dm-sans-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 600; font-display: swap; src: url("fonts/dm-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "DM Sans"; font-weight: 700; font-display: swap; src: url("fonts/dm-sans-latin-700-normal.woff2") format("woff2"); }
 
+/* Light: Peach, Card, Lavender, Periwinkle, Indigo, Night, Muted, Line (brand doc). */
 :root {
-  --ground: #FEF2E2;      /* cream paper */
-  --card: #FFFBF5;
-  --soft: #F1EAF8;        /* lavender tint */
-  --head: #F8F0E6;
-  --ink: #1F1A2E;
-  --muted: #575166;
-  --faint: #6A6476;
-  --line: #EDE1D1;
-  --line-strong: #D6C8B6;
-  --tab-bg: #E6DDF3;
-  --chip: #E6DDF3;
-  --chip-ink: #1F1A2E;
-  --accent: #342E86;      /* indigo */
-  --accent-ink: #FFFFFF;
-  --accent-hover: #2A2570;
-  --lavender: #8E63B3;
-  --note: #FFF7E6;
-  --note-ink: #5C4310;
-  --uv-mid: #F6E3A8;
-  --uv-high: #F0B77E;
-  /* weather word tints (Gillefeeling cover presets) */
-  --w-sun: #F3E3B5;
-  --w-mix: #F2D6C4;
-  --w-cloudy: #DDD6EC;
-  --w-rain: #D3E2EC;
-  --w-wind: #D5E3D6;
-  --w-snow: #EEF1F7;
+  --ground: #FEF2E2; --card: #FFFBF5; --soft: #F1EAF8; --peri: #B7B1E6; --on-peri: #1F1A2E;
+  --ink: #1F1A2E; --muted: #575166; --line: #EDE1D1; --edge: #8A8299;
+  --accent: #342E86; --on-accent: #FFFFFF;
+  /* weather word tints (semantic) */
+  --w-sun: #F3E3B5; --w-mix: #F2D6C4; --w-cloudy: #DDD6EC; --w-rain: #D3E2EC; --w-wind: #D5E3D6; --w-snow: #EEF1F7;
   --serif: "Fraunces", Georgia, serif;
-  --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  color-scheme: light;
+  --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light dark;
 }
-
+/* Dark: chosen with the switch (ellenial-theme.js sets data-theme on <html>),
+   or following the phone when JavaScript is off. Keep the two blocks identical. */
+:root[data-theme="dark"] {
+    --ground: #17141F; --card: #221E2C; --soft: #2D2640; --peri: #463C6E; --on-peri: #F3EEF8;
+    --ink: #F3EEF8; --muted: #C2BACF; --line: #332D40; --edge: #7D7393;
+    --accent: #B39AE8; --on-accent: #1A1430;
+    --w-sun: #4A4128; --w-mix: #4A362B; --w-cloudy: #3C3749; --w-rain: #2E3E48; --w-wind: #31423A; --w-snow: #3A3F4C;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #17141F;
-    --card: #221E2C;
-    --soft: #2D2640;
-    --head: #262130;
-    --ink: #F3EEF8;
-    --muted: #C2BACF;
-    --faint: #A9A1B7;
-    --line: #332D40;
-    --line-strong: #4A4259;
-    --tab-bg: #2D2640;
-    --chip: #3A3052;
-    --chip-ink: #F3EEF8;
-    --accent: #B39AE8;
-    --accent-ink: #1A1430;
-    --accent-hover: #C7B4F0;
-    --note: #3A3020;
-    --note-ink: #F0DDB4;
-    --w-sun: #4A4128;
-    --w-mix: #4A362B;
-    --w-cloudy: #3C3749;
-    --w-rain: #2E3E48;
-    --w-wind: #31423A;
-    --w-snow: #3A3F4C;
-    color-scheme: dark;
+  :root:not([data-theme]) {
+    --ground: #17141F; --card: #221E2C; --soft: #2D2640; --peri: #463C6E; --on-peri: #F3EEF8;
+    --ink: #F3EEF8; --muted: #C2BACF; --line: #332D40; --edge: #7D7393;
+    --accent: #B39AE8; --on-accent: #1A1430;
+    --w-sun: #4A4128; --w-mix: #4A362B; --w-cloudy: #3C3749; --w-rain: #2E3E48; --w-wind: #31423A; --w-snow: #3A3F4C;
   }
 }
 
@@ -88,7 +58,7 @@ body {
 }
 
 a { color: var(--accent); }
-a:hover { color: var(--accent-hover); }
+a:hover { text-decoration-thickness: 2px; }
 
 .page {
   max-width: 560px;
@@ -104,18 +74,18 @@ a:hover { color: var(--accent-hover); }
 .brand { font-family: var(--serif); font-size: 18px; font-weight: 500; margin: 0; }
 .place {
   font: inherit; font-size: 14px; font-weight: 600; color: var(--ink);
-  background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--card); border: 1.5px solid var(--edge); border-radius: 999px;
   padding: 10px 14px; min-height: 44px;
 }
 .place:disabled { cursor: default; }
 
 /* Tabs */
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--tab-bg); border-radius: 999px; padding: 4px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--soft); border-radius: 999px; padding: 4px; }
 .tab {
-  min-height: 44px; border: 0; border-radius: 999px; background: transparent;
+  min-height: 44px; border: 1.5px solid transparent; border-radius: 999px; background: transparent;
   font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; padding: 0 8px;
 }
-.tab[aria-selected="true"] { background: var(--card); color: var(--ink); font-weight: 700; }
+.tab[aria-selected="true"] { background: var(--peri); border-color: var(--accent); color: var(--on-peri); font-weight: 700; }
 .tab:focus-visible, .place:focus-visible, .rain-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 /* Cards */
@@ -123,7 +93,7 @@ a:hover { color: var(--accent-hover); }
 .card.tight { padding: 18px 8px 14px; gap: 10px; }
 .label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 0; }
 .title { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0; }
-.chip { align-self: flex-start; font-size: 12px; font-weight: 700; background: var(--chip); color: var(--chip-ink); border-radius: 8px; padding: 4px 10px; }
+.chip { align-self: flex-start; font-size: 12px; font-weight: 700; background: var(--soft); color: var(--ink); border-radius: 8px; padding: 4px 10px; }
 .muted { color: var(--muted); }
 
 /* Right now */
@@ -139,7 +109,7 @@ a:hover { color: var(--accent-hover); }
 .hour-temp { font-family: var(--serif); font-size: 18px; }
 .hour-small { font-size: 11px; color: var(--muted); }
 
-.hour-word { font-size: 9px; font-weight: 700; color: var(--chip-ink); background: var(--chip); border-radius: 5px; padding: 2px 4px; }
+.hour-word { font-size: 9px; font-weight: 700; color: var(--ink); background: var(--soft); border-radius: 5px; padding: 2px 4px; }
 .hour-rain.wet { color: var(--accent); font-weight: 700; }
 
 .rain { border-top: 1px solid var(--line); padding-top: 4px; }
@@ -149,7 +119,7 @@ a:hover { color: var(--accent-hover); }
 .rain-dot.on { background: var(--accent); }
 
 /* Weather words, tinted by kind */
-.chip, .hour-word, .week-word { color: var(--chip-ink); }
+.chip, .hour-word, .week-word { color: var(--ink); }
 [data-w="SUN"], [data-w="CLEAR"] { background: var(--w-sun); }
 [data-w="MIX"] { background: var(--w-mix); }
 [data-w="CLOUDY"] { background: var(--w-cloudy); }
@@ -165,9 +135,9 @@ a:hover { color: var(--accent-hover); }
 /* Week tables */
 .week-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; }
 .week-dates { font-size: 13px; color: var(--muted); }
-.week { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--tab-bg); border-radius: 12px; overflow: hidden; }
+.week { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .week th, .week td { border-left: 1px solid var(--line); border-top: 1px solid var(--line); text-align: center; padding: 8px 0; font-size: 14px; color: var(--ink); }
-.week thead th { border-top: 0; background: var(--head); padding: 0; }
+.week thead th { border-top: 0; background: var(--soft); padding: 0; }
 .week th:first-child, .week td:first-child { border-left: 0; }
 .day-btn {
   width: 100%; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
@@ -177,19 +147,26 @@ a:hover { color: var(--accent-hover); }
 .day-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .week .dow { display: block; font-size: 14px; font-weight: 700; }
 .week .date { display: block; font-size: 13px; font-weight: 600; }
-.week th.today { background: var(--accent); color: var(--accent-ink); }
+.week th.today { background: var(--accent); color: var(--on-accent); }
 .week td.today-col { background: var(--ground); }
-.week .past { opacity: 0.55; }
-.week .beyond { color: var(--faint); opacity: 0.6; }
-.week th.picked:not(.today), .week td.picked { background: var(--soft); }
+.week .past { color: var(--muted); }
+.week .past .week-hi, .week .past .week-word { font-weight: 500; }
+.week .beyond { color: var(--muted); }
+.week th.picked:not(.today), .week td.picked { background: var(--peri); color: var(--on-peri); }
+/* Everything inside the open day reads in on-peri: muted grey and the pale dot fall below 4.5:1 / 3:1 on Periwinkle.
+   Rain stays bold and the dots stay ● / ○, so nothing there relied on colour. */
+.week td.picked .week-lo, .week td.picked .wet, .week td.picked .sure-on, .week td.picked .sure-off, .week td.picked .measured, .week td.picked.past, .week td.picked.beyond { color: var(--on-peri); }
+/* Open day: fill plus an underlined date, and its hours open right below, so not colour alone. */
+.week th.picked .date { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .week td { height: 44px; }
-.week-word { display: inline-block; max-width: 100%; font-size: 10.5px; font-weight: 700; color: var(--chip-ink); background: var(--chip); border-radius: 5px; padding: 3px 2px; letter-spacing: 0.1px; }
+.week-word { display: inline-block; max-width: 100%; font-size: 10.5px; font-weight: 700; color: var(--ink); background: var(--soft); border-radius: 5px; padding: 3px 2px; letter-spacing: 0.1px; }
 .week-hi { display: block; font-family: var(--serif); font-size: 19px; line-height: 1.1; }
 .week-lo { display: block; font-size: 13px; color: var(--muted); }
 .week .wet { color: var(--accent); font-weight: 700; }
 .sure { font-size: 11px; letter-spacing: 1px; }
 .sure-on { color: var(--accent); }
-.sure-off { color: var(--line-strong); }
+.sure-off { color: var(--edge); }
+.measured { font-size: 12px; font-weight: 700; color: var(--muted); }
 .loading { margin: 0; padding: 12px 16px; border-radius: 16px; background: var(--soft); color: var(--muted); font-size: 14px; text-align: center; }
 @media (prefers-reduced-motion: no-preference) {
   .loading { animation: breathe 1.6s ease-in-out infinite; }
@@ -206,7 +183,7 @@ a:hover { color: var(--accent-hover); }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-.normals { background: var(--soft); border: 1px dashed var(--line-strong); border-radius: 24px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.normals { background: var(--soft); border: 1.5px dashed var(--edge); border-radius: 24px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
 .normals p { margin: 0; font-size: 15px; line-height: 1.45; }
 .link-button { font: inherit; font-size: 14px; font-weight: 700; color: var(--accent); background: none; border: 0; padding: 0; min-height: 44px; text-align: left; cursor: pointer; text-decoration: underline; }
 
@@ -216,9 +193,14 @@ a:hover { color: var(--accent-hover); }
 .stat-name { font-size: 12px; font-weight: 700; color: var(--muted); }
 .stat-value { font-family: var(--serif); font-size: 22px; }
 .section-text { margin: 0; font-size: 15px; line-height: 1.45; }
-.caveat { background: var(--note); color: var(--note-ink); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; margin: 0; }
+.caveat { background: var(--soft); color: var(--ink); border-left: 3px solid var(--accent); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; margin: 0; }
 
-/* Footer */
+/* Footer: Auto / Light / Dark (shared ellenial-theme.js) and credits */
+.prefs { display: flex; align-items: center; gap: 6px; padding: 0 6px; margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.theme-switch { display: inline-flex; gap: 2px; align-items: center; }
+.theme-switch__btn { border: none; background: none; min-height: 44px; padding: 6px 6px; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.theme-switch__btn[aria-pressed="true"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.theme-switch__btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .credits { font-size: 12px; color: var(--muted); line-height: 1.5; padding: 0 6px; margin: 0; }
 
 .skeleton-note { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }

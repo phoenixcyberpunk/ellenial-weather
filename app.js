@@ -42,6 +42,17 @@
     });
   });
 
+  // Auto / Light / Dark, the shared Ellenial switch (ellenial-theme.js), saved on this phone only.
+  var prefs = document.getElementById("prefs");
+  if (prefs && window.EllenialTheme) {
+    prefs.appendChild(window.EllenialTheme.control({
+      label: "Theme", separator: " · ", autoHint: "Follows your phone",
+      labels: { auto: "Auto", light: "Light", dark: "Dark" },
+    }));
+  } else if (prefs) {
+    prefs.hidden = true;
+  }
+
   // The page always opens on today's forecast unless the link says otherwise.
   show(location.hash === "#usually" ? "usually" : "forecast");
 
@@ -196,7 +207,9 @@
         btn.disabled = !!d.empty;
         btn.setAttribute("aria-pressed", open === d.date ? "true" : "false");
         btn.setAttribute("aria-label", FULL[i] + " " + dd.getUTCDate() + (d.empty ? "" : ", show hours"));
-        btn.appendChild(el("span", "dow", DOW[i]));
+        // Today says so in words, not only with the indigo fill (never colour alone).
+        btn.appendChild(el("span", "dow", d.today ? "Today" : DOW[i]));
+        if (d.today) th.setAttribute("aria-current", "date");
         btn.appendChild(el("span", "date", String(dd.getUTCDate())));
         btn.addEventListener("click", function () {
           setOpen(open === d.date ? null : d.date, "tap");
@@ -239,11 +252,12 @@
       row("Wind", function (d) { return d.wind === null ? "–" : String(d.wind); },
         function (d) { return d.wind === null ? "unknown" : d.wind + " metres per second"; });
       row("How sure", function (d) {
-        if (d.sure === null || d.sure === undefined) return ""; // past days: the note under the table says where they come from
+        // Past days get a ✓ (measured), so "past" never rests on the grey alone; the note names the station.
+        if (d.sure === null || d.sure === undefined) return d.past ? el("span", "measured", "✓") : "";
         var s = el("span", "sure");
         s.setAttribute("aria-label", ["", "less sure", "fairly sure", "sure"][d.sure]);
         s.appendChild(el("span", "sure-on", "●".repeat(d.sure)));
-        s.appendChild(el("span", "sure-off", "●".repeat(3 - d.sure)));
+        s.appendChild(el("span", "sure-off", "○".repeat(3 - d.sure))); // hollow, not just paler
         return s;
       }, function (d) { return d.sure ? ["", "less sure", "fairly sure", "sure"][d.sure] : "measured"; });
       table.appendChild(tbody);
@@ -254,6 +268,11 @@
       legend.appendChild(document.createTextNode("High/low °C · rain mm · wind m/s · "));
       var dots = el("span", "sure-on", "●●●"); legend.appendChild(dots);
       legend.appendChild(document.createTextNode(" how sure"));
+      if (week.some(function (d) { return d.past && !d.empty && (d.sure === null || d.sure === undefined); })) {
+        legend.appendChild(document.createTextNode(" · "));
+        legend.appendChild(el("span", "measured", "✓"));
+        legend.appendChild(document.createTextNode(" measured"));
+      }
       card.appendChild(legend);
 
       card.appendChild(slot);

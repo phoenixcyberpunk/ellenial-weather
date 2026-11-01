@@ -47,9 +47,18 @@ Tests: `node --test`.
 5. Place search
 6. Friends test, then decide on release
 
+## Look
+
+The Ellenial brand (final, 1 Nov 2026): the shared Ellenial palette in light and dark (Peach, Card, Lavender, Periwinkle, Indigo, Night, Muted, Line), Fraunces for headings and DM Sans for text.
+
+- **Theme:** Auto / Light / Dark in the footer, via `ellenial-theme.js`, copied unchanged from [ellenial maps](https://github.com/phoenixcyberpunk/ellenial-maps). Saved on the phone only (`localStorage`, key `ellenial:theme`; Auto stores nothing). Test with `?theme=light` or `?theme=dark` (not saved).
+- **Never colour alone:** today's column says "Today", measured past days get a ✓, How sure uses filled and hollow dots (●●○), the open day has an underlined date and its hours open right below, and every weather word is written out (its tint only helps scanning).
+- **Contrast:** text at least 4.5:1, controls, outlines and icons at least 3:1, in both themes. Line is decorative only; anything tappable gets a stronger edge.
+- Weather word tints (sun yellow, rain blue…) stay as semantic colours, like green/red elsewhere.
+
 ## Fonts
 
-[Fraunces](https://github.com/undercasetype/Fraunces) and [Instrument Sans](https://github.com/Instrument/instrument-sans), SIL Open Font License 1.1 (licences in `fonts/`).
+[Fraunces](https://github.com/undercasetype/Fraunces) and [DM Sans](https://github.com/googlefonts/dm-fonts), SIL Open Font License 1.1 (licences in `fonts/`), served from this site, never from Google.
 
 ## Licence
 
