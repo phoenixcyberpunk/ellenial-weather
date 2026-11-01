@@ -15,9 +15,9 @@ Free. No ads, no trackers, no accounts, no cookies. No third-party requests from
 
 | Source | Used for | Licence |
 | --- | --- | --- |
-| [SMHI Open Data](https://www.smhi.se/en/services/open-data) | Swedish forecast (snow1g), measured past days, station history | CC BY 4.0 |
+| [SMHI Open Data](https://www.smhi.se/en/services/open-data) | Swedish forecast (snow1g), measured past days, station history (lows, highs, rain, sunshine) | CC BY 4.0 |
 | [MET Norway](https://api.met.no/) | One forecast | CC BY 4.0 / NLOD |
-| [Open-Meteo](https://open-meteo.com/) | Several models (ECMWF, DWD ICON, DMI, NOAA GFS), history archive, UV | CC BY 4.0 data; free API is non-commercial |
+| [Open-Meteo](https://open-meteo.com/) | Several models (ECMWF, DWD ICON, DMI, NOAA GFS), ERA5 history archive, UV from the forecast archive | CC BY 4.0 data; free API is non-commercial |
 
 Data is processed and combined by Ellenial.
 
@@ -26,7 +26,7 @@ Data is processed and combined by Ellenial.
 A static page (`index.html`, `styles.css`, `app.js`), no build step. Small serverless functions in `api/` on Vercel fetch and combine the forecasts:
 
 - `/api/forecast` — combined forecast per hour (today and the next two days) and per day (Monday this week to Sunday the week after), cached 30 min
-- `/api/history` — frost odds, sunny days, UV and then-vs-now, cached for weeks
+- `/api/history` — a usual day for every date of the year, frost odds, sunny days, UV and then-vs-now, cached 30 days per 0.1° place
 
 Each source is its own small module in `lib/sources/`, so a broken source drops out instead of breaking the page. Six forecasts today: SMHI, MET Norway, ECMWF, DWD ICON, DMI and NOAA GFS (Open-Meteo's MET Norway copy and second ECMWF are left out so no model counts twice).
 
@@ -36,6 +36,14 @@ Past days: what SMHI's nearest weather station measured (temperature, rain and w
 
 A day gets a summary when at least 18 of its hours have data; later days show a dash. Daily How sure compares each forecast's high and whether it brings at least 1 mm of rain.
 
+What usually happens (`/api/history`, `lib/history.js`):
+
+- **Sources, best first.** Each part uses SMHI's nearest long-running station (within 30 km, 20+ years, quality-controlled archive) where there is one: daily lows and highs, daily rain, hourly sunshine (for Gothenburg: Göteborg A and Göteborg Sol). Where there isn't, ERA5 via Open-Meteo. ERA5's sunshine runs high (about 1.5× the measured hours in Gothenburg), so the page warns when it has to use it. UV comes from Open-Meteo's forecast archive, kept only since March 2021, so it's labelled a rough guide.
+- **Odds lean on recent years:** the last 20 complete years. A "usual day" is the median high and low, the share of days with 1 mm+ rain, and average sunshine over the 7 days centred on each date.
+- **Frost** = a night below 0 °C at 2 m; a frost season runs July–June. First autumn frost: the dates by which it had come in 3, 5 and 7 of 10 seasons. Last spring frost: the usual date and the date after which it came in only 1 year in 10 (the planting-out date). Seasons with no frost count as "not by then".
+- **Sunny day** = 6+ hours of sunshine. **UV** months: a typical (median) day at UV 3 or more.
+- **How it's changing:** 1991–2000 against the last 10 complete years, from the station when it has at least 7 complete years in each (Göteborg A has gaps in the late 1990s), otherwise from ERA5, which has no gaps or station moves.
+
 Tests: `node --test`.
 
 ## Build plan
@@ -43,7 +51,7 @@ Tests: `node --test`.
 1. Skeleton: repo, Vercel project, domain, both views, credits ← *done*
 2. Forecast for Gothenburg: right now, today hour by hour, rain line ← *done*
 3. Week tables with measured past days ← *done*
-4. What usually happens
+4. What usually happens ← *on staging*
 5. Place search
 6. Friends test, then decide on release
 
