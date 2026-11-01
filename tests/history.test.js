@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const h = require("../lib/history");
-const { parseSmhiDaily } = require("../lib/sources/historySources");
+const { parseSmhiDaily, parseSmhiSun } = require("../lib/sources/historySources");
 
 // A made-up climate: a smooth yearly temperature curve, frost on a few known nights each season.
 function makeDays(fromYear, toYear, opts = {}) {
@@ -124,4 +124,22 @@ test("SMHI archive CSV: rows keyed by the day they belong to", () => {
   assert.equal(m.size, 2);
   assert.equal(m.get("1961-01-01"), -3.4);
   assert.equal(m.get("2026-07-31"), 16);
+});
+
+test("SMHI sunshine: hourly seconds summed per day; days missing hours are dropped", () => {
+  const rows = ["Datum;Tid (UTC);Solskenstid;Kvalitet;;Tidsutsnitt:"];
+  for (let hr = 0; hr < 24; hr++) rows.push(`2020-06-01;${String(hr).padStart(2, "0")}:00:00;${hr >= 8 && hr < 14 ? 3600 : 0};G`);
+  rows.push("2020-06-02;12:00:00;3600;G");
+  const m = parseSmhiSun(rows.join("\n"));
+  assert.equal(m.get("2020-06-01"), 6);
+  assert.equal(m.has("2020-06-02"), false);
+});
+
+test("summarise takes each field from its own source and falls back to the model", () => {
+  const model = makeDays(1991, 2025).map((d) => ({ ...d, sun: 10 }));
+  const sun = makeDays(2000, 2025).map((d) => ({ date: d.date, sun: 1 }));
+  const s = h.summarise({ temps: null, rain: null, sun, model, uv: null });
+  assert.equal(s.days[h.slot("2025-06-01")][3], 1, "sun from the station, not the model");
+  assert.equal(s.sun.months[5].sunnyDays, 0);
+  assert.equal(s.changing.from, "model");
 });

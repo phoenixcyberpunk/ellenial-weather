@@ -4,7 +4,7 @@
 // heavy to make and changes slowly: Vercel's edge caches it for 30 days per place.
 // Coordinates are rounded to 0.1° (about 10 km) so nearby visitors share one cached answer.
 
-const { smhiTemps, modelDays, uvDays } = require("../lib/sources/historySources");
+const { smhiTemps, smhiRain, smhiSun, modelDays, uvDays } = require("../lib/sources/historySources");
 const { summarise } = require("../lib/history");
 
 const GOTHENBURG = { lat: 57.7, lon: 12.0 };
@@ -26,7 +26,9 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: "lat and lon must be numbers" }));
   }
 
-  const [stRes, mRes, uvRes] = await Promise.allSettled([smhiTemps(lat, lon), modelDays(lat, lon), uvDays(lat, lon)]);
+  const [tRes, rRes, sRes, mRes, uvRes] = await Promise.allSettled([
+    smhiTemps(lat, lon), smhiRain(lat, lon), smhiSun(lat, lon), modelDays(lat, lon), uvDays(lat, lon)
+  ]);
 
   if (mRes.status === "rejected") {
     res.statusCode = 502;
@@ -35,23 +37,32 @@ module.exports = async (req, res) => {
   }
 
   const model = mRes.value.days;
-  const station = stRes.status === "fulfilled" && stRes.value ? stRes.value : null;
+  const got = (r) => (r.status === "fulfilled" && r.value ? r.value : null);
+  const t = got(tRes), r = got(rRes), s = got(sRes);
   const uv = uvRes.status === "fulfilled" ? uvRes.value : null;
-  const out = summarise({ temps: station ? station.days : model, model, uv });
+  const out = summarise({ temps: t && t.days, rain: r && r.days, sun: s && s.days, model, uv });
 
+  const ERA5 = "ERA5 (Open-Meteo)";
+  const src = (res, hit) => hit
+    ? { kind: "station", name: `SMHI ${hit.station.name}`, km: hit.station.km }
+    : { kind: "model", name: ERA5, why: res.status === "rejected" ? "station data unreachable" : "no long-running station nearby" };
   out.place = { lat, lon, timezone: mRes.value.timezone };
   out.sources = {
-    temps: station
-      ? { kind: "station", name: `SMHI ${station.station.name}`, km: station.station.km }
-      : { kind: "model", name: "ERA5 (Open-Meteo)", why: stRes.status === "rejected" ? "station data unreachable" : "no long-running station nearby" },
-    rainSun: { kind: "model", name: "ERA5 (Open-Meteo)" },
-    uv: uv ? { kind: "forecast archive", name: "Open-Meteo forecast archive" } : null
+    temps: src(tRes, t),
+    rain: src(rRes, r),
+    sun: src(sRes, s),
+    uv: uv ? { kind: "forecast archive", name: "Open-Meteo forecast archive" } : null,
+    changing: out.changing ? (out.changing.from === "station" ? src(tRes, t) : { kind: "model", name: ERA5 }) : null
   };
+  if (url.searchParams.has("diag")) { // TEMPORARY: why a station decade is too thin
+    const { completeYears } = require("../lib/history");
+    out.diag = { tempsYears: t ? completeYears(t.days, "tmin") : null, rainYears: r ? completeYears(r.days, "mm") : null, sunYears: s ? completeYears(s.days, "sun") : null };
+  }
   out.generatedAt = new Date().toISOString();
   out.tookMs = Date.now() - started;
 
   // Only cache a full answer for long; a fallback (station or UV missing) retries within a day.
-  const complete = stRes.status === "fulfilled" && uvRes.status === "fulfilled";
+  const complete = [tRes, rRes, sRes, uvRes].every((x) => x.status === "fulfilled");
   res.setHeader("Cache-Control", complete
     ? "public, s-maxage=2592000, stale-while-revalidate=2592000"
     : "public, s-maxage=86400, stale-while-revalidate=86400");
