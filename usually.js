@@ -236,9 +236,13 @@
       var d = c.firstFrostLaterDays;
       card.appendChild(el("p", "section-text", "The first autumn frost now comes about " + Math.abs(d) + " days " + (d > 0 ? "later" : "earlier") + " than in the 1990s."));
     }
-    card.appendChild(el("p", "source-note", c.from === "station"
-      ? sourceLine([{ what: "temperatures", src: h.sources.temps }, { what: "rain", src: h.sources.rain }], null)
-      : "From the ERA5 weather model, which has no gaps or station moves over these years."));
+    var parts = [{ what: "temperatures", src: h.sources.temps }];
+    if (c.then.rainyDays !== null && c.now.rainyDays !== null) parts.push({ what: "rain", src: h.sources.rain });
+    var thin = [c.then, c.now].filter(function (x) { return x.years < 10; })
+      .map(function (x) { return " " + x.from + "–" + String(x.to).slice(2) + " has " + x.years + " full years of 10 (the station has gaps)."; }).join("");
+    card.appendChild(el("p", "source-note", (c.from === "station"
+      ? sourceLine(parts, null)
+      : "From the ERA5 weather model, which has no gaps or station moves over these years.") + thin));
   }
 
   function render(h) {
