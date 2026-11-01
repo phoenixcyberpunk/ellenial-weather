@@ -159,6 +159,7 @@ a:hover { text-decoration-thickness: 2px; }
 /* Open day: fill plus an underlined date, and its hours open right below, so not colour alone. */
 .week th.picked .date { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .week td { height: 44px; }
+.week td.tappable { cursor: pointer; }
 .week-word { display: inline-block; max-width: 100%; font-size: 10.5px; font-weight: 700; color: var(--ink); background: var(--soft); border-radius: 5px; padding: 3px 2px; letter-spacing: 0.1px; }
 .week-hi { display: block; font-family: var(--serif); font-size: 19px; line-height: 1.1; }
 .week-lo { display: block; font-size: 13px; color: var(--muted); }

@@ -231,6 +231,12 @@
           var cls = classes[i] + (open === d.date ? " picked" : "");
           var td = d.empty ? cell("–", cls) : cell(fn(d), cls);
           td.setAttribute("aria-label", d.empty ? label + ": no forecast yet" : label + ": " + spoken(d));
+          // Tapping anywhere in a day's column opens it too, not just its date (Ellen's phone test:
+          // her taps landed on the numbers). The date button stays the keyboard/screen-reader control.
+          if (!d.empty) {
+            td.classList.add("tappable");
+            td.addEventListener("click", function () { setOpen(open === d.date ? null : d.date, "tap"); });
+          }
           tr.appendChild(td);
           cols[i].push(td);
         });
