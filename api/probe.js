@@ -15,8 +15,22 @@ const TESTS = {
 
 function km(a, b, c, d) { const r = Math.PI / 180, x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * 6371; }
 
+async function csvPeek(url) {
+  const t = Date.now();
+  const r = await fetch(url, { headers: { "User-Agent": "EllenialWeather/0.2 (+https://github.com/phoenixcyberpunk/ellenial-weather)" } });
+  const text = await r.text();
+  const lines = text.split(/\r?\n/);
+  return { status: r.status, ms: Date.now() - t, bytes: text.length, lines: lines.length, head: lines.slice(0, 14), tail: lines.slice(-4) };
+}
+
 module.exports = async (req, res) => {
   const out = {};
+  if (new URL(req.url, "http://x").searchParams.has("csv")) {
+    const B = "https://opendata-download-metobs.smhi.se/api/version/1.0/parameter/";
+    const [a, b] = await Promise.all([csvPeek(B + "19/station/71420/period/corrected-archive/data.csv"), csvPeek(B + "20/station/71420/period/corrected-archive/data.csv")]);
+    res.setHeader("Content-Type", "application/json"); res.setHeader("Cache-Control", "no-store");
+    return res.end(JSON.stringify({ min19: a, max20: b }, null, 1));
+  }
   await Promise.all(Object.entries(TESTS).map(async ([k, url]) => {
     const t = Date.now();
     try {
