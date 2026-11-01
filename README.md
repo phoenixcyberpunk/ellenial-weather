@@ -51,7 +51,7 @@ Tests: `node --test`.
 1. Skeleton: repo, Vercel project, domain, both views, credits ← *done*
 2. Forecast for Gothenburg: right now, today hour by hour, rain line ← *done*
 3. Week tables with measured past days ← *done*
-4. What usually happens ← *on staging*
+4. What usually happens ← *done*
 5. Place search
 6. Friends test, then decide on release
 
