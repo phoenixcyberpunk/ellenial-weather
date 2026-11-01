@@ -54,10 +54,6 @@ module.exports = async (req, res) => {
     uv: uv ? { kind: "forecast archive", name: "Open-Meteo forecast archive" } : null,
     changing: out.changing ? (out.changing.from === "station" ? src(tRes, t) : { kind: "model", name: ERA5 }) : null
   };
-  if (url.searchParams.has("diag")) { // TEMPORARY: why a station decade is too thin
-    const { completeYears } = require("../lib/history");
-    out.diag = { tempsYears: t ? completeYears(t.days, "tmin") : null, rainYears: r ? completeYears(r.days, "mm") : null, sunYears: s ? completeYears(s.days, "sun") : null };
-  }
   out.generatedAt = new Date().toISOString();
   out.tookMs = Date.now() - started;
 

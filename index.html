@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="styles.css">
 <script src="debug.js"></script>
 <script src="app.js" defer></script>
+<script src="usually.js" defer></script>
 </head>
 <body>
 <main class="page">
@@ -59,7 +60,7 @@
 
       <aside class="normals">
         <h2 class="label">After the forecasts end</h2>
-        <p>No forecast reaches this far yet. The normal for this time of year will show here.</p>
+        <p id="normals-text">No forecast reaches this far yet. The normal for this time of year will show here.</p>
         <button type="button" class="link-button" data-go="usually">See what usually happens ›</button>
       </aside>
 
@@ -70,23 +71,39 @@
   <section id="view-usually" role="tabpanel" aria-labelledby="tab-usually" hidden>
     <div style="display:flex;flex-direction:column;gap:16px">
 
-      <article class="card">
-        <h2 class="label">Usually this week</h2>
+      <p class="usually-intro">Odds from past weather, never predictions.</p>
+      <p id="usually-loading" class="loading" role="status">Going through 35 years of weather…</p>
+
+      <article class="card" id="u-week">
+        <h2 class="label" id="u-week-title">Usually this week</h2>
         <div class="stats">
-          <div class="stat"><span class="stat-name">Temp</span><span class="stat-value">–</span></div>
-          <div class="stat"><span class="stat-name">Rain</span><span class="stat-value">–</span></div>
-          <div class="stat"><span class="stat-name">Sun</span><span class="stat-value">–</span></div>
+          <div class="stat"><span class="stat-name">High / low</span><span class="stat-value" id="u-temp">–</span></div>
+          <div class="stat"><span class="stat-name">Rainy days</span><span class="stat-value" id="u-rain">–</span></div>
+          <div class="stat"><span class="stat-name">Sun a day</span><span class="stat-value" id="u-sun">–</span></div>
         </div>
+        <p class="source-note" id="u-week-note"></p>
       </article>
 
-      <article class="card"><h2 class="title">Frost</h2><p class="section-text muted">First autumn frost and last spring frost, as odds.</p></article>
-      <article class="card"><h2 class="title">Sunny days</h2><p class="section-text muted">Days with 6+ hours of sun, average per month.</p></article>
-      <article class="card">
+      <article class="card" id="u-frost">
+        <h2 class="title">Frost</h2>
+        <p class="section-text muted">First autumn frost and last spring frost, as odds.</p>
+      </article>
+
+      <article class="card" id="u-sun-card">
+        <h2 class="title">Sunny days</h2>
+        <p class="section-text muted">Days with 6+ hours of sun, average per month.</p>
+      </article>
+
+      <article class="card" id="u-uv">
         <h2 class="title">UV</h2>
         <p class="section-text muted">When UV usually passes 3, month by month.</p>
         <p class="caveat">UV has been recorded for far fewer years than temperature, so this is a rough guide.</p>
       </article>
-      <article class="card"><h2 class="title">How it's changing</h2><p class="section-text muted">The 1990s compared with the last 10 years.</p></article>
+
+      <article class="card" id="u-change">
+        <h2 class="title">How it's changing</h2>
+        <p class="section-text muted">The 1990s compared with the last 10 years.</p>
+      </article>
 
     </div>
   </section>

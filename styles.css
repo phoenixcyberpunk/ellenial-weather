@@ -195,6 +195,40 @@ a:hover { text-decoration-thickness: 2px; }
 .section-text { margin: 0; font-size: 15px; line-height: 1.45; }
 .caveat { background: var(--soft); color: var(--ink); border-left: 3px solid var(--accent); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; margin: 0; }
 
+/* What usually happens */
+.usually-intro { margin: 0; padding: 0 6px; font-size: 14px; color: var(--muted); }
+.source-note { margin: 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.fact { display: flex; flex-direction: column; gap: 2px; }
+.fact-head { margin: 0; font-size: 15px; font-weight: 700; }
+.fact-sub { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.change-head { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.3; }
+
+/* Month strips and bars: the number or mark is always written; "now" also gets a bold, underlined label. */
+.strip, .uv-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; }
+.strip-cell, .uv-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 0 6px; border-radius: 9px; background: var(--soft); border: 2px solid transparent; }
+.strip-cell.frosty { background: var(--peri); color: var(--on-peri); }
+.strip-mark { font-size: 13px; line-height: 1; min-height: 13px; }
+.strip-label, .uv-label, .bar-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+.strip-cell.frosty .strip-label { color: var(--on-peri); }
+.now > .strip-label, .now > .uv-label, .now > .bar-label { color: var(--ink); font-weight: 800; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+.strip-cell.frosty.now > .strip-label { color: var(--on-peri); }
+.uv-cell.care { border-color: var(--accent); }
+.uv-value { font-family: var(--serif); font-size: 17px; line-height: 1.1; }
+.uv-legend { margin: -6px 0 0; font-size: 12px; color: var(--muted); }
+
+.bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; align-items: end; }
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bar-value { font-size: 12px; font-weight: 700; }
+.bar-track { width: 100%; height: 96px; display: flex; align-items: flex-end; justify-content: center; }
+.bar { width: 72%; min-height: 4px; border-radius: 5px 5px 2px 2px; background: var(--accent); }
+.bar-col.now .bar { background: var(--peri); outline: 2px solid var(--accent); outline-offset: -2px; }
+
+table.change { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.change th, table.change td { padding: 8px 4px; border-top: 1px solid var(--line); text-align: right; }
+table.change thead th { border-top: 0; font-size: 12px; font-weight: 700; color: var(--muted); }
+table.change th[scope="row"] { text-align: left; font-weight: 500; }
+table.change td:last-child { font-weight: 700; }
+
 /* Footer: Auto / Light / Dark (shared ellenial-theme.js) and credits */
 .prefs { display: flex; align-items: center; gap: 6px; padding: 0 6px; margin: 0 0 6px; font-size: 13px; color: var(--muted); }
 .theme-switch { display: inline-flex; gap: 2px; align-items: center; }
