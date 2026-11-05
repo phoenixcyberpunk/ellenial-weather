@@ -173,10 +173,22 @@ a:hover { text-decoration-thickness: 2px; }
   .week-word { font-size: 9.5px; }
   .stat { padding: 10px 10px; }
   .stat-value { font-size: 19px; }
-  .normals { padding: 16px 18px; border-radius: 20px; }
-  /* Forecast: Right now across the top, then the weeks and the usual-week card two by two. */
-  .forecast-stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
-  .forecast-stack > .card:first-child, .forecast-stack > .loading { grid-column: 1 / -1; }
+  .forecast-stack > .normals { padding: 14px 18px; border-radius: 20px; }
+  /* Forecast on about one screen: Right now as one row (temperature left, hours right),
+     the three weeks side by side, the usual week as a slim strip. */
+  .forecast-stack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .forecast-stack > .card:first-child, .forecast-stack > .loading, .forecast-stack > .normals { grid-column: 1 / -1; }
+  .forecast-stack > .card:first-child {
+    display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); column-gap: 20px; row-gap: 8px;
+    grid-template-areas: "label hours" "now hours" "rain rain"; align-items: start;
+  }
+  .forecast-stack > .card:first-child > .label { grid-area: label; }
+  .forecast-stack > .card:first-child > .now { grid-area: now; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .forecast-stack > .card:first-child > .hours { grid-area: hours; min-height: 0; }
+  .forecast-stack > .card:first-child > .rain { grid-area: rain; }
+  .forecast-stack > .normals { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 28px; row-gap: 6px; }
+  .forecast-stack > .normals .stats { flex: 0 1 460px; }
+  .forecast-stack > .normals .link-button { margin-left: auto; }
   #weeks { display: contents !important; }
   .forecast-stack > *, .usually-stack > * { min-width: 0; }
   /* What usually happens: cards side by side, the climate comparison across the bottom. */
