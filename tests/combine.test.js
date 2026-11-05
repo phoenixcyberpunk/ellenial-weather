@@ -77,3 +77,12 @@ test("wet and just above freezing is sleet", () => {
   assert.strictEqual(weatherWord({ ...base, temp: 1.5 }), "SLEET");
   assert.strictEqual(weatherWord({ ...base, temp: 2.5 }), "RAIN");
 });
+
+test("fog needs two forecasts, like thunder, and keeps the weather word", () => {
+  const sources = ["a", "b", "c", "d"].map((id, i) => ({ id, hours: [{ t: T0, temp: 6, cloud: 20, fog: i < 2 }] }));
+  const [h] = combine(sources, 57.71, 11.97);
+  assert.strictEqual(h.fog, true);
+  assert.strictEqual(h.word, "SUN");
+  const one = ["a", "b", "c"].map((id, i) => ({ id, hours: [{ t: T0, temp: 6, cloud: 20, fog: i === 0 }] }));
+  assert.strictEqual(combine(one, 57.71, 11.97)[0].fog, false);
+});

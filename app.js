@@ -130,17 +130,22 @@
   }
   var CALM = { SUN: 1, CLEAR: 1, MIX: 1, CLOUDY: 1 }; // the badge sits on the sun or cloud only, never on rain, snow or thunder
   function isBreezy(word, wind) { return CALM[word] === 1 && wind !== null && wind !== undefined && wind >= BREEZE; }
-  function spokenWeather(word, wind) {
+  function spokenWeather(word, wind, fog) {
+    if (isFoggy(word, fog)) return "foggy, " + (SPOKEN[word] || "changeable") + " above";
     return (SPOKEN[word] || "changeable") + (isBreezy(word, wind) ? ", breezy" : "");
   }
-  function weatherIcon(word, day, wind, cls) {
+  function isFoggy(word, fog) { return fog === true && CALM[word] === 1; } // rain, snow and thunder win over fog
+  function weatherIcon(word, day, wind, cls, fog) {
     var box = el("span", "w-icon" + (cls ? " " + cls : ""));
     box.setAttribute("aria-hidden", "true");
     var name = iconName(word, day);
     if (!name) { box.textContent = "–"; return box; }
     var img = el("img", "w-main"); img.src = "icons/w/" + name + ".png"; img.alt = ""; img.decoding = "async";
     box.appendChild(img);
-    if (isBreezy(word, wind)) {
+    if (isFoggy(word, fog)) {
+      var f = el("img", "w-fog"); f.src = "icons/w/fog.png"; f.alt = ""; f.decoding = "async";
+      box.appendChild(f);
+    } else if (isBreezy(word, wind)) {
       var b = el("img", "w-breeze"); b.src = "icons/w/breeze.png"; b.alt = ""; b.decoding = "async";
       box.appendChild(b);
     }
@@ -201,9 +206,9 @@
       var mm = h.mm >= 0.1 ? Math.round(h.mm * 10) / 10 : 0;
       var col = el("div", "hour-col" + (h.now ? " now" : ""));
       col.setAttribute("role", "group");
-      col.setAttribute("aria-label", (h.now ? "Now" : h.time) + ": " + spokenWeather(h.word, h.wind) + ", " + Math.round(h.temp) + " degrees, " +
+      col.setAttribute("aria-label", (h.now ? "Now" : h.time) + ": " + spokenWeather(h.word, h.wind, h.fog) + ", " + Math.round(h.temp) + " degrees, " +
         mm + " millimetres, wind " + (h.wind === null || h.wind === undefined ? "unknown" : h.wind + " metres per second"));
-      col.appendChild(weatherIcon(h.word, h.isDay, h.wind, "hour-icon"));
+      col.appendChild(weatherIcon(h.word, h.isDay, h.wind, "hour-icon", h.fog));
       var barBox = el("div", "rain-bar-box"); barBox.setAttribute("aria-hidden", "true");
       if (mm > 0) {
         var bar = el("div", "rain-bar");
@@ -276,7 +281,7 @@
     panel.appendChild(el("p", "day-hours-title", name + ", hour by hour"));
     var nowHour = day.today ? placeHour() : -1;
     var items = day.hours.filter(function (h) { return h.temp !== null; }).map(function (h) {
-      return { time: pad(h.hour), now: h.hour === nowHour, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, isDay: h.day, hour: h.hour };
+      return { time: pad(h.hour), now: h.hour === nowHour, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, isDay: h.day, fog: h.fog, hour: h.hour };
     });
     var startHour = nowHour >= 0 ? Math.max(0, nowHour - 1) : 6, idx = 0;
     items.forEach(function (h, i) { if (h.hour <= startHour) idx = i; });
@@ -368,8 +373,8 @@
         });
         tbody.appendChild(tr);
       }
-      row("Weather", function (d) { return weatherIcon(d.word, true, d.wind, "week-icon"); },
-        function (d) { return spokenWeather(d.word, d.wind); });
+      row("Weather", function (d) { return weatherIcon(d.word, true, d.wind, "week-icon", d.fog); },
+        function (d) { return spokenWeather(d.word, d.wind, d.fog); });
       row("Temperature", function (d) {
         var f = document.createDocumentFragment();
         f.appendChild(el("span", "week-hi", Math.round(d.hi) + "°"));
@@ -523,8 +528,8 @@
     // Right now
     nowCard.temp.textContent = deg(now.temp);
     nowCard.chip.textContent = "";
-    nowCard.chip.appendChild(weatherIcon(now.word, now.day, now.wind, "now-icon"));
-    nowCard.line.textContent = (WORDS[now.word] || "Changeable") + (isBreezy(now.word, now.wind) ? ", breezy" : "") + " and " + feel(now.temp) +
+    nowCard.chip.appendChild(weatherIcon(now.word, now.day, now.wind, "now-icon", now.fog));
+    nowCard.line.textContent = (isFoggy(now.word, now.fog) ? "Foggy" : (WORDS[now.word] || "Changeable") + (isBreezy(now.word, now.wind) ? ", breezy" : "")) + " and " + feel(now.temp) +
       (now.wind !== null ? " · " + now.wind + "\u00a0m/s" : "");
 
     var todayHours = hours.filter(function (h) { return clock(h.t).day === local.day; });
@@ -544,7 +549,7 @@
       if (h.t === slot) nowIdx = i;
       var nextDay = c.day !== local.day && c.hour === 0;
       var cd = parseDate(c.day);
-      return { time: nextDay ? DOW[(cd.getUTCDay() + 6) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, isDay: h.day,
+      return { time: nextDay ? DOW[(cd.getUTCDay() + 6) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, isDay: h.day, fog: h.fog,
         day: DOW[(cd.getUTCDay() + 6) % 7] + " " + cd.getUTCDate() + " " + MONTHS[cd.getUTCMonth()] };
     });
     hoursEl.textContent = "";

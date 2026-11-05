@@ -28,3 +28,19 @@ for name in NAMES:
     sq.alpha_composite(im.crop((x0, y0, x1, y1)), ((side - (x1 - x0)) // 2, (side - (y1 - y0)) // 2))
     sq.resize((SIZE, SIZE), Image.LANCZOS).save(os.path.join(OUT, name + ".png"), optimize=True)
     print(name, os.path.getsize(os.path.join(OUT, name + ".png")), "bytes")
+
+# Fog is an overlay laid across the lower part of sun, moon and cloud, not a square icon.
+# Ellen drew two strokes; the gap between them is halved here (decided 5 Nov) so it reads as one band of mist.
+fog = Image.open(os.path.join(SRC, "fog.png")).convert("RGBA")
+fog = fog.crop(fog.getchannel("A").getbbox())
+filled = [any(fog.getpixel((x, y))[3] > 20 for x in range(0, fog.size[0], 4)) for y in range(fog.size[1])]
+gap = [y for y, f in enumerate(filled) if not f]
+if gap:
+    g0, shift = gap[0], (gap[-1] - gap[0] + 1) // 2
+    out = Image.new("RGBA", (fog.size[0], fog.size[1] - shift), (0, 0, 0, 0))
+    out.alpha_composite(fog.crop((0, g0, fog.size[0], fog.size[1])), (0, g0 - shift))
+    out.alpha_composite(fog.crop((0, 0, fog.size[0], g0)), (0, 0))
+    fog = out
+w = SIZE * 2
+fog.resize((w, round(w * fog.size[1] / fog.size[0])), Image.LANCZOS).save(os.path.join(OUT, "fog.png"), optimize=True)
+print("fog", os.path.getsize(os.path.join(OUT, "fog.png")), "bytes")

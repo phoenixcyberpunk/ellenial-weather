@@ -360,6 +360,8 @@ table.change td:last-child { font-weight: 700; }
 /* Weather icons (Ellen's drawings, icons/w). Bright fills carry both themes, so no disc behind them. */
 .w-icon { position: relative; display: inline-block; flex: none; line-height: 0; }
 .w-icon .w-main { width: 100%; height: 100%; display: block; }
+/* Fog: Ellen's two mist strokes across the lower part of the sun, moon or cloud */
+.w-icon .w-fog { position: absolute; left: 2%; width: 96%; height: auto; bottom: 0; }
 .w-icon .w-breeze { position: absolute; width: 50%; height: 50%; right: -18%; bottom: -14%; }
 .now-icon-box { background: none; padding: 0; }
 .now-icon { width: 52px; height: 52px; }
