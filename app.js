@@ -465,6 +465,18 @@
     };
   }
 
+  // Visit counter for Ellen's project board: one count per browser per day, nothing else.
+  // The date is remembered in this browser only; the server just adds 1 to today's number.
+  (function countVisit() {
+    try {
+      var day = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm" }).format(new Date());
+      if (localStorage.getItem("ellenial-weather-counted") === day) return;
+      localStorage.setItem("ellenial-weather-counted", day);
+      if (navigator.sendBeacon) navigator.sendBeacon("/api/visit");
+      else fetch("/api/visit", { method: "POST", keepalive: true }).catch(function () {});
+    } catch (e) { /* private mode or storage off: skip counting rather than count every load */ }
+  })();
+
   var WORDS = { THUNDER: "Thundery", DRIZZLE: "Drizzly", SLEET: "Sleety", SUN: "Sunny", CLEAR: "Clear", MIX: "Partly cloudy", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
 
   function feel(temp) {
