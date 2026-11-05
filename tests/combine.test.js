@@ -70,3 +70,10 @@ test("light rain is drizzle, from 0.5 mm an hour it's rain", () => {
   assert.strictEqual(weatherWord({ ...base, mm: 0.5 }), "RAIN");
   assert.strictEqual(weatherWord({ ...base, temp: 0, mm: 0.2 }), "SNOW");
 });
+
+test("wet and just above freezing is sleet", () => {
+  const base = { mm: 1, rainShare: 1, wind: 3, cloud: 100, day: true };
+  assert.strictEqual(weatherWord({ ...base, temp: 0.5 }), "SNOW");
+  assert.strictEqual(weatherWord({ ...base, temp: 1.5 }), "SLEET");
+  assert.strictEqual(weatherWord({ ...base, temp: 2.5 }), "RAIN");
+});
