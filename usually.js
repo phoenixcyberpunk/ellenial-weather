@@ -265,7 +265,9 @@
   }
 
   function fail() {
-    $("usually-loading").textContent = "The weather history couldn't be reached. Try again in a little while.";
+    var msg = "The weather history couldn't be reached. Try again in a little while.";
+    if (window.EllenialOops) window.EllenialOops($("usually-loading"), msg);
+    else $("usually-loading").textContent = msg;
   }
 
   // History is shared per 0.1° (about 10 km), so nearby places use one cached answer.
@@ -301,6 +303,7 @@
   window.EllenialPlace.onChange(function () {
     retried = false;
     var loading = $("usually-loading");
+    loading.classList.remove("oops");
     loading.textContent = "Going through 35 years of weather…";
     loading.hidden = false;
     ["u-frost", "u-sun-card", "u-change"].forEach(function (id) { clearAfter($(id), 1); });

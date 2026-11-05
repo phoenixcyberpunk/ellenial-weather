@@ -374,3 +374,7 @@ table.change td:last-child { font-weight: 700; }
 .title-icon { width: 30px; height: 30px; flex: none; }
 .strip-mark img { width: 18px; height: 18px; display: block; }
 .strip-mark { min-height: 18px; }
+
+/* Something couldn't be reached: Ellen's puzzled cloud above the message, no breathing animation */
+.loading.oops { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px; animation: none; color: var(--ink); }
+.oops-cloud { width: 88px; height: 88px; }

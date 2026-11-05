@@ -600,10 +600,24 @@
     document.getElementById("source-count").textContent = "Combined from " + okCount + (okCount === 1 ? " forecast. " : " forecasts. ");
   }
 
+  // When something can't be reached: Ellen's puzzled cloud instead of a bare line of text.
+  function oops(target, text) {
+    target.textContent = "";
+    target.classList.add("oops");
+    var img = el("img", "oops-cloud"); img.src = "icons/w/oops.png"; img.alt = "";
+    target.appendChild(img);
+    target.appendChild(el("span", "", text));
+  }
+  window.EllenialOops = oops; // usually.js uses the same
+
   function fail() {
+    nowCard.temp.textContent = ""; // "–°" next to the cloud only looked broken
     nowCard.line.textContent = "The forecasts couldn't be reached";
     nowCard.sub.textContent = "Try again in a little while.";
-    document.getElementById("loading").textContent = "The forecasts couldn't be reached. Try again in a little while.";
+    nowCard.chip.textContent = "";
+    var sad = el("img", "now-icon"); sad.src = "icons/w/oops.png"; sad.alt = "";
+    nowCard.chip.appendChild(sad);
+    document.getElementById("loading").hidden = true; // Right now already says it, with the cloud
   }
 
   // Load the forecast for the chosen place; a newer load wins if the place changes mid-way.
@@ -618,6 +632,7 @@
 
   window.EllenialPlace.onChange(function () {
     var loading = document.getElementById("loading");
+    loading.classList.remove("oops");
     loading.textContent = "Fetching six forecasts…";
     loading.hidden = false;
     nowCard.temp.textContent = "–°";

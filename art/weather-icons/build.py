@@ -8,7 +8,7 @@ from PIL import Image, ImageFilter
 
 SRC = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(SRC, "..", "..", "icons", "w")
-NAMES = ["sun", "clear", "mix-day", "mix-night", "cloudy", "rain", "snow", "wind", "breeze", "thunder", "drizzle", "sleet", "frost", "uv", "change"]
+NAMES = ["sun", "clear", "mix-day", "mix-night", "cloudy", "rain", "snow", "wind", "breeze", "thunder", "drizzle", "sleet", "frost", "uv", "change", "oops"]
 SIZE = 144
 THICKEN = {"wind": 13}  # px of dilation at 1024 px
 WINDOW = 840  # px of the 1024 canvas shown; the drawings fill roughly 700–800 of it
