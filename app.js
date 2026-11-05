@@ -121,7 +121,7 @@
     if (word === "MIX") return day === false ? "mix-night" : "mix-day";
     if (word === "CLOUDY") return "cloudy";
     if (word === "RAIN") return "rain";
-    if (word === "DRIZZLE") return "rain"; // TODO: "drizzle" once Ellen's cloud-with-one-drop is drawn
+    if (word === "DRIZZLE") return "drizzle";
     if (word === "SNOW") return "snow";
     if (word === "WIND") return "wind";
     if (word === "THUNDER") return "thunder";
