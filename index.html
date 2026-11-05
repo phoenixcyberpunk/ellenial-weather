@@ -58,8 +58,12 @@
       <div id="weeks" style="display:flex;flex-direction:column;gap:16px"></div>
 
       <aside class="normals">
-        <h2 class="label">After the forecasts end</h2>
-        <p id="normals-text">No forecast reaches this far yet. The normal for this time of year will show here.</p>
+        <h2 class="label" id="normals-title">After the forecasts end</h2>
+        <div class="stats" id="normals-stats" hidden>
+          <div class="stat"><span class="stat-name">High / low</span><span class="stat-value" id="n-temp">–</span></div>
+          <div class="stat"><span class="stat-name">Rainy days</span><span class="stat-value" id="n-rain">–</span></div>
+          <div class="stat"><span class="stat-name">Sun a day</span><span class="stat-value" id="n-sun">–</span></div>
+        </div>
         <button type="button" class="link-button" data-go="usually">See what usually happens ›</button>
       </aside>
 
@@ -70,7 +74,6 @@
   <section id="view-usually" role="tabpanel" aria-labelledby="tab-usually" hidden>
     <div style="display:flex;flex-direction:column;gap:16px">
 
-      <p class="usually-intro">Odds from past weather, never predictions.</p>
       <p id="usually-loading" class="loading" role="status">Going through 35 years of weather…</p>
 
       <article class="card" id="u-week">
@@ -85,23 +88,18 @@
 
       <article class="card" id="u-frost">
         <h2 class="title">Frost</h2>
-        <p class="section-text muted">First autumn frost and last spring frost, as odds.</p>
       </article>
 
       <article class="card" id="u-sun-card">
         <h2 class="title">Sunny days</h2>
-        <p class="section-text muted">Days with 6+ hours of sun, average per month.</p>
       </article>
 
       <article class="card" id="u-uv">
         <h2 class="title">UV</h2>
-        <p class="section-text muted">When UV usually passes 3, month by month.</p>
-        <p class="caveat">UV has been recorded for far fewer years than temperature, so this is a rough guide.</p>
       </article>
 
       <article class="card" id="u-change">
         <h2 class="title">How it's changing</h2>
-        <p class="section-text muted">The 1990s compared with the last 10 years.</p>
       </article>
 
     </div>

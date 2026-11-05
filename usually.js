@@ -81,8 +81,11 @@
     var range = start.getMonth() === end.getMonth()
       ? start.getDate() + "–" + end.getDate() + " " + MON[end.getMonth()]
       : start.getDate() + " " + MON[start.getMonth()] + " – " + end.getDate() + " " + MON[end.getMonth()];
-    $("normals-text").textContent = "Around " + range + ", a usual day has a high of " + deg(u.hi) + " and a low of " + deg(u.lo) +
-      ", rain on about " + Math.round(u.rain * 7) + " of 7 days and " + (u.sun < 1 ? "under an hour" : "about " + Math.round(u.sun) + " h") + " of sun.";
+    $("normals-title").textContent = "Usually " + range;
+    $("n-temp").textContent = deg(u.hi) + " / " + deg(u.lo);
+    $("n-rain").textContent = Math.round(u.rain * 7) + " of 7";
+    $("n-sun").textContent = u.sun < 1 ? "under 1 h" : Math.round(u.sun) + " h";
+    $("normals-stats").hidden = false;
   }
 
   // ---- Frost ----------------------------------------------------------------------------
@@ -129,20 +132,20 @@
     var spring = el("div", "fact");
     spring.appendChild(el("p", "fact-head", "Last frost in spring: usually around " + fmt(f.lastSpring.typical)));
     if (f.lastSpring.safe) {
-      spring.appendChild(el("p", "fact-sub", "After " + fmt(f.lastSpring.safe) + " only 1 year in 10, so that's when frost-tender plants can usually go out."));
+      spring.appendChild(el("p", "fact-sub", "Plant out after " + fmt(f.lastSpring.safe)));
     }
     card.appendChild(spring);
 
     card.appendChild(el("p", "section-text", "About " + f.nightsPerYear + " frost nights a winter" +
       (f.noFrostSeasons ? "; " + f.noFrostSeasons + " of the last " + f.seasons + " winters had none." : ".")));
-    card.appendChild(el("p", "caveat", "Frost here means below 0 °C at 2 m, as weather stations measure it. Frost on the ground, which nips plants, can come earlier in autumn and later in spring."));
+    card.appendChild(el("p", "caveat", "Ground frost can come earlier."));
     card.appendChild(el("p", "source-note", sourceLine([{ what: "nights", src: h.sources.temps }], "winters " + f.from + "/" + String(f.from + 1).slice(2) + " to " + (f.to - 1) + "/" + String(f.to).slice(2))));
   }
 
   // ---- Sunny days: a bar per month, its number written on top ---------------------------
   function renderSun(h) {
     var card = $("u-sun-card"), months = h.sun && h.sun.months;
-    clearAfter(card, 2);
+    clearAfter(card, 1);
     if (!months || months.every(function (m) { return m.sunnyDays === null; })) return;
     var max = Math.max.apply(null, months.map(function (m) { return m.sunnyDays || 0; })) || 1;
     var chart = el("div", "bars");
@@ -160,12 +163,13 @@
       chart.appendChild(col);
     });
     card.appendChild(chart);
+    card.appendChild(el("p", "uv-legend", "Days with 6 h+ of sun"));
     var best = months.slice().sort(function (a, b) { return b.sunnyDays - a.sunnyDays; })[0];
     var cur = months[thisMonth - 1];
     card.appendChild(el("p", "section-text", MONTH[thisMonth - 1] + " usually has " + cur.sunnyDays + " sunny days, about " +
       cur.hoursPerDay + " h of sun a day. Sunniest: " + MONTH[best.month - 1] + " (" + best.sunnyDays + ")."));
     if (h.sources.sun.kind === "model") {
-      card.appendChild(el("p", "caveat", "There's no sunshine station near here, so these come from a weather model, which counts more sun than stations measure. Read them as sunnier than real."));
+      card.appendChild(el("p", "caveat", "No sunshine station near here; the model reads sunnier than real."));
     }
     card.appendChild(el("p", "source-note", sourceLine([{ what: "sunshine", src: h.sources.sun }], h.sun.from + "–" + h.sun.to)));
   }
@@ -173,7 +177,7 @@
   // ---- UV: typical daily max per month ---------------------------------------------------
   function renderUv(h) {
     var card = $("u-uv"), uv = h.uv;
-    clearAfter(card, 2);
+    clearAfter(card, 1);
     if (!uv) {
       card.appendChild(el("p", "caveat", "UV history couldn't be reached right now."));
       return;
@@ -192,13 +196,12 @@
     card.appendChild(el("p", "uv-legend", "Outlined: UV 3 or more on a typical day"));
     if (uv.careFrom) {
       card.appendChild(el("p", "section-text", "From " + MONTH[uv.careFrom - 1] + " to " + MONTH[uv.careTo - 1] +
-        ", a typical day reaches UV 3 or more, when sun protection is advised around midday. Clear days can be higher than this."));
+        ": UV 3+"));
     } else {
-      card.appendChild(el("p", "section-text", "A typical day here stays below UV 3 all year. Clear summer days can still be higher."));
+      card.appendChild(el("p", "section-text", "Below UV 3 all year"));
     }
     var since = new Date(uv.from + "T12:00:00");
-    card.appendChild(el("p", "caveat", "UV has only been kept since " + MONTH[since.getMonth()] + " " + since.getFullYear() +
-      " (forecast archive), far fewer years than temperature, so this is a rough guide."));
+    card.appendChild(el("p", "caveat", "UV records since " + MONTH[since.getMonth()] + " " + since.getFullYear()));
   }
 
   // ---- How it's changing ----------------------------------------------------------------

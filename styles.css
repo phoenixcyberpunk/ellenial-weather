@@ -197,7 +197,6 @@ a:hover { text-decoration-thickness: 2px; }
 .caveat { background: var(--soft); color: var(--ink); border-left: 3px solid var(--accent); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; margin: 0; }
 
 /* What usually happens */
-.usually-intro { margin: 0; padding: 0 6px; font-size: 14px; color: var(--muted); }
 .source-note { margin: 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
 .fact { display: flex; flex-direction: column; gap: 2px; }
 .fact-head { margin: 0; font-size: 15px; font-weight: 700; }
