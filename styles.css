@@ -71,9 +71,9 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* Header */
 .top { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
-.brand { font-family: var(--serif); font-size: 18px; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 10px; }
+.brand { font-family: var(--serif); font-size: 18px; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 12px; }
 /* The library tile from ellenial.app (Ellen's hand-drawn flower), as a small mark beside the name. */
-.brand-icon { width: 32px; height: 32px; border-radius: 8px; flex: none; }
+.brand-icon { width: 48px; height: 48px; border-radius: 11px; flex: none; }
 .place {
   font: inherit; font-size: 14px; font-weight: 600; color: var(--ink);
   background: var(--card); border: 1.5px solid var(--edge); border-radius: 999px;
