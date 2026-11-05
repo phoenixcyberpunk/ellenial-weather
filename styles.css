@@ -131,7 +131,9 @@ a:hover { text-decoration-thickness: 2px; }
 .now-sub { font-size: 13px; color: var(--muted); }
 
 .hours { min-height: 186px; }
-.hours .hour-scroll { background: var(--soft); }
+.hours .hour-chart { display: flex; flex-direction: column; gap: 6px; }
+.hour-day { margin: 0; padding: 0 2px; font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.hour-scroll { background: var(--soft); }
 .hour { display: flex; flex-direction: column; gap: 5px; align-items: center; padding: 9px 2px; border-radius: 12px; background: var(--soft); }
 .hour-time { font-size: 12px; font-weight: 700; color: var(--muted); }
 .hour-temp { font-family: var(--serif); font-size: 18px; }

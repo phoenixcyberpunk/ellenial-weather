@@ -61,8 +61,6 @@
   today.setHours(0, 0, 0, 0);
   var dowIndex = (today.getDay() + 6) % 7; // Monday = 0
 
-  document.getElementById("today-label").textContent =
-    DOW[dowIndex] + " " + today.getDate() + " " + MONTHS[today.getMonth()];
 
   var hoursEl = document.getElementById("today-hours");
 
@@ -187,7 +185,25 @@
     // Jump straight to the start column, never smooth-scrolled (iPhone taps).
     var idx = Math.min(startIdx || 0, hours.length - 1);
     requestAnimationFrame(function () { scroller.scrollLeft = idx * COL; });
-    return scroller;
+
+    // A chart that runs past midnight gets a day label above it that follows the scroll,
+    // so it always names the day you're looking at ("Thu 5 Nov" → "Fri 6 Nov").
+    var days = hours.map(function (h) { return h.day; });
+    if (!days[0] || days.every(function (d) { return d === days[0]; })) return scroller;
+    var wrap = el("div", "hour-chart");
+    var dayEl = el("p", "hour-day", days[idx]);
+    dayEl.setAttribute("aria-live", "polite");
+    function follow() {
+      // The day of the column in the middle of what's showing.
+      var mid = Math.floor((scroller.scrollLeft + scroller.clientWidth / 2) / COL);
+      var d = days[Math.max(0, Math.min(days.length - 1, mid))];
+      if (dayEl.textContent !== d) dayEl.textContent = d;
+    }
+    scroller.addEventListener("scroll", follow, { passive: true });
+    requestAnimationFrame(follow);
+    wrap.appendChild(dayEl);
+    wrap.appendChild(scroller);
+    return wrap;
   }
 
   // A tapped day: starts at now (today) or 06 (other days).
@@ -429,9 +445,6 @@
     var slot = Math.floor(nowT / HOUR) * HOUR;
     var now = byT[slot] || hours.filter(function (h) { return h.t <= nowT; }).pop() || hours[0];
     var local = clock(nowT);
-    var ld = parseDate(local.day);
-    document.getElementById("today-label").textContent =
-      DOW[(ld.getUTCDay() + 6) % 7] + " " + ld.getUTCDate() + " " + MONTHS[ld.getUTCMonth()];
 
     // Right now
     nowCard.temp.textContent = deg(now.temp);
@@ -456,7 +469,9 @@
       var c = clock(h.t);
       if (h.t === slot) nowIdx = i;
       var nextDay = c.day !== local.day && c.hour === 0;
-      return { time: nextDay ? DOW[(dowIndex + 1) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word };
+      var cd = parseDate(c.day);
+      return { time: nextDay ? DOW[(cd.getUTCDay() + 6) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word,
+        day: DOW[(cd.getUTCDay() + 6) % 7] + " " + cd.getUTCDate() + " " + MONTHS[cd.getUTCMonth()] };
     });
     hoursEl.textContent = "";
     hoursEl.appendChild(hourChart(items, "Today", Math.max(0, nowIdx - 1)));

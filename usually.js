@@ -124,7 +124,6 @@
       // Frost in fewer than half the winters: there's no "usual" date, only how often.
       var some = el("div", "fact");
       some.appendChild(el("p", "fact-head", "Frost in " + (f.seasons - f.noFrostSeasons) + " of the last " + f.seasons + " winters"));
-      if (f.lastSpring.safe) some.appendChild(el("p", "fact-sub", "Plant out after " + fmt(f.lastSpring.safe)));
       card.appendChild(some);
       card.appendChild(el("p", "section-text", "About " + f.nightsPerYear + " frost nights a winter."));
       card.appendChild(el("p", "caveat", "Ground frost can come earlier."));
@@ -141,9 +140,6 @@
 
     var spring = el("div", "fact");
     spring.appendChild(el("p", "fact-head", "Last frost in spring: usually around " + fmt(f.lastSpring.typical)));
-    if (f.lastSpring.safe) {
-      spring.appendChild(el("p", "fact-sub", "Plant out after " + fmt(f.lastSpring.safe)));
-    }
     card.appendChild(spring);
 
     card.appendChild(el("p", "section-text", "About " + f.nightsPerYear + " frost nights a winter" +
