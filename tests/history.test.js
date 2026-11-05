@@ -143,3 +143,22 @@ test("summarise takes each field from its own source and falls back to the model
   assert.equal(s.sun.months[5].sunnyDays, 0);
   assert.equal(s.changing.from, "model");
 });
+
+test("south of the equator, frost seasons run January to December", () => {
+  const { frost } = require("../lib/history");
+  const days = [];
+  for (let y = 2000; y < 2015; y++) {
+    for (let m = 1; m <= 12; m++) {
+      for (let d = 1; d <= 28; d++) {
+        const date = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        // Frost nights in June to August only (southern winter).
+        days.push({ date, tmin: m >= 6 && m <= 8 && d === 15 ? -1 : 6, tmax: 15 });
+      }
+    }
+  }
+  const f = frost(days, 20, true);
+  assert.strictEqual(f.startMonth, 1);
+  assert.strictEqual(f.firstAutumn.typical.month, 6);
+  assert.strictEqual(f.lastSpring.typical.month, 8);
+  assert.strictEqual(f.nightsPerYear, 3);
+});

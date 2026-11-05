@@ -26,8 +26,12 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify({ error: "lat and lon must be numbers" }));
   }
 
+  // SMHI's stations are all in Sweden, so elsewhere their lookups are skipped.
+  const inSweden = lat >= 55 && lat <= 69.5 && lon >= 10.5 && lon <= 24.5;
+  const none = () => Promise.resolve(null);
   const [tRes, rRes, sRes, mRes, uvRes] = await Promise.allSettled([
-    smhiTemps(lat, lon), smhiRain(lat, lon), smhiSun(lat, lon), modelDays(lat, lon), uvDays(lat, lon)
+    inSweden ? smhiTemps(lat, lon) : none(), inSweden ? smhiRain(lat, lon) : none(), inSweden ? smhiSun(lat, lon) : none(),
+    modelDays(lat, lon), uvDays(lat, lon)
   ]);
 
   if (mRes.status === "rejected") {
@@ -40,7 +44,7 @@ module.exports = async (req, res) => {
   const got = (r) => (r.status === "fulfilled" && r.value ? r.value : null);
   const t = got(tRes), r = got(rRes), s = got(sRes);
   const uv = uvRes.status === "fulfilled" ? uvRes.value : null;
-  const out = summarise({ temps: t && t.days, rain: r && r.days, sun: s && s.days, model, uv });
+  const out = summarise({ temps: t && t.days, rain: r && r.days, sun: s && s.days, model, uv, south: lat < 0 });
 
   const ERA5 = "ERA5 (Open-Meteo)";
   const src = (res, hit) => hit

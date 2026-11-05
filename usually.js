@@ -93,7 +93,7 @@
   function frostStrip(f) {
     var startM = f.firstAutumn.early ? f.firstAutumn.early.month : null;
     var endM = f.lastSpring.safe ? f.lastSpring.safe.month : null;
-    var order = [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6];
+    var order = f.startMonth === 1 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6];
     var pos = function (m) { return order.indexOf(m); };
     var wrap = el("div", "strip");
     wrap.setAttribute("role", "img");
@@ -138,7 +138,7 @@
     card.appendChild(el("p", "section-text", "About " + f.nightsPerYear + " frost nights a winter" +
       (f.noFrostSeasons ? "; " + f.noFrostSeasons + " of the last " + f.seasons + " winters had none." : ".")));
     card.appendChild(el("p", "caveat", "Ground frost can come earlier."));
-    card.appendChild(el("p", "source-note", sourceLine([{ what: "nights", src: h.sources.temps }], "winters " + f.from + "/" + String(f.from + 1).slice(2) + " to " + (f.to - 1) + "/" + String(f.to).slice(2))));
+    card.appendChild(el("p", "source-note", sourceLine([{ what: "nights", src: h.sources.temps }], (f.startMonth === 1 ? "winters " + f.from + "–" + f.to : "winters " + f.from + "/" + String(f.from + 1).slice(2) + " to " + (f.to - 1) + "/" + String(f.to).slice(2)))));
   }
 
   // ---- Sunny days: a bar per month, its number written on top ---------------------------
@@ -267,10 +267,17 @@
     fetch("/api/history?lat=" + lat + "&lon=" + lon)
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (h) { if (mine === loadSeq) render(h); })
-      .catch(function () { if (mine === loadSeq) fail(); });
+      .catch(function () {
+        if (mine !== loadSeq) return;
+        // A place nobody has looked at yet can take a while the first time; try once more.
+        if (!retried) { retried = true; $("usually-loading").textContent = "Still going through the years…"; load(); return; }
+        fail();
+      });
   }
+  var retried = false;
 
   window.EllenialPlace.onChange(function () {
+    retried = false;
     var loading = $("usually-loading");
     loading.textContent = "Going through 35 years of weather…";
     loading.hidden = false;
