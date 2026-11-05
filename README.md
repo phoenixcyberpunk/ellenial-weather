@@ -64,6 +64,10 @@ The Ellenial brand (final, 1 Nov 2026): the shared Ellenial palette in light and
 - **Contrast:** text at least 4.5:1, controls, outlines and icons at least 3:1, in both themes. Line is decorative only; anything tappable gets a stronger edge.
 - Weather word tints (sun yellow, rain blue…) stay as semantic colours, like green/red elsewhere.
 
+## Icons
+
+Hand-drawn by Ellen in Procreate. The page's copies are built from `art/weather-icons` by `build.py`; the shared set for every Ellenial app lives at [ellenial.app/drawings](https://ellenial.app/drawings). Drawings licensed [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), separately from the code.
+
 ## Fonts
 
 [Fraunces](https://github.com/undercasetype/Fraunces) and [DM Sans](https://github.com/googlefonts/dm-fonts), SIL Open Font License 1.1 (licences in `fonts/`), served from this site, never from Google.
