@@ -103,7 +103,8 @@ a:hover { text-decoration-thickness: 2px; }
 .now-line { font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
 .now-sub { font-size: 13px; color: var(--muted); }
 
-.hours { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.hours { min-height: 186px; }
+.hours .hour-scroll { background: var(--soft); }
 .hour { display: flex; flex-direction: column; gap: 5px; align-items: center; padding: 9px 2px; border-radius: 12px; background: var(--soft); }
 .hour-time { font-size: 12px; font-weight: 700; color: var(--muted); }
 .hour-temp { font-family: var(--serif); font-size: 18px; }

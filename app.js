@@ -66,31 +66,6 @@
 
   var hoursEl = document.getElementById("today-hours");
 
-  function renderHours(cells) {
-    hoursEl.textContent = "";
-    cells.forEach(function (c) {
-      var div = document.createElement("div");
-      div.className = "hour";
-      div.innerHTML =
-        '<span class="hour-time"></span><span class="hour-word"></span><span class="hour-temp"></span>' +
-        '<span class="hour-small hour-rain"></span><span class="hour-small"></span>';
-      var spans = div.querySelectorAll("span");
-      spans[0].textContent = c.time;
-      spans[1].textContent = c.word;
-      spans[1].setAttribute("data-w", c.word);
-      spans[2].textContent = c.temp;
-      spans[3].textContent = c.rain;
-      if (c.wet) spans[3].classList.add("wet");
-      spans[4].textContent = c.wind;
-      hoursEl.appendChild(div);
-    });
-  }
-
-  // Placeholders while the forecast loads.
-  renderHours(["Now", "", "", "", "", ""].map(function (t) {
-    return { time: t || "–", word: "–", temp: "–", rain: "– mm", wind: "– m/s" };
-  }));
-
   // ---- Week tables (this week, next week, the week after) ----------------
   // Mon–Sun across the top, one row per measure. Past days show what was measured
   // (greyed), today is highlighted, days beyond the forecasts show a dash.
@@ -136,24 +111,29 @@
     return e;
   }
 
-  // A tapped day: every hour as a chart you can scroll sideways. Temperature is a line with its
-  // value written above each point; rain is a bar with the mm written under it (never colour alone).
+  // Hours as a chart you scroll sideways, used by the Today card and by a tapped day. Temperature
+  // is a line with its value written above each point; rain is a bar with the mm written under it
+  // (never colour alone). items: { time, now, temp, mm, wind, word }.
   var COL = 52, LINE_H = 56;
   var placeHour = function () { return new Date().getHours(); }; // replaced by the place's own clock once data arrives
-  function hourPanel(day) {
-    var panel = el("div", "day-hours");
-    var d = parseDate(day.date);
-    var name = FULL[(d.getUTCDay() + 6) % 7] + " " + d.getUTCDate();
-    panel.appendChild(el("p", "day-hours-title", name + ", hour by hour"));
-    var hours = day.hours.filter(function (h) { return h.temp !== null; });
+  function hourChart(items, label, startIdx) {
+    var hours = items.filter(function (h) { return h.temp !== null && h.temp !== undefined; });
     var scroller = el("div", "hour-scroll");
     scroller.setAttribute("role", "region");
-    scroller.setAttribute("aria-label", name + ", every hour. Scroll sideways.");
+    scroller.setAttribute("aria-label", label + ", every hour. Scroll sideways.");
     scroller.tabIndex = 0;
+    if (!hours.length) return scroller;
     var track = el("div", "hour-track");
     track.style.width = hours.length * COL + "px";
 
-    // Temperature line across the columns.
+    var times = el("div", "hour-cols hour-times");
+    hours.forEach(function (h) {
+      var t = el("span", "hour-time" + (h.now ? " now" : ""), h.now ? "Now" : h.time);
+      t.setAttribute("aria-hidden", "true");
+      times.appendChild(t);
+    });
+    track.appendChild(times);
+
     var temps = hours.map(function (h) { return h.temp; });
     var hi = Math.max.apply(null, temps), lo = Math.min.apply(null, temps), span = Math.max(hi - lo, 4);
     var mid = (hi + lo) / 2;
@@ -164,9 +144,8 @@
     svg.setAttribute("width", hours.length * COL);
     svg.setAttribute("height", LINE_H + 8);
     svg.setAttribute("aria-hidden", "true");
-    var pts = hours.map(function (h, i) { return (i * COL + COL / 2) + "," + y(h.temp); });
     var poly = document.createElementNS(NS, "polyline");
-    poly.setAttribute("points", pts.join(" "));
+    poly.setAttribute("points", hours.map(function (h, i) { return (i * COL + COL / 2) + "," + y(h.temp); }).join(" "));
     svg.appendChild(poly);
     hours.forEach(function (h, i) {
       var cx = i * COL + COL / 2, cy = y(h.temp);
@@ -178,27 +157,19 @@
       txt.textContent = Math.round(h.temp) + "°";
       svg.appendChild(txt);
     });
-    var nowHour = day.today ? placeHour() : -1;
-    var times = el("div", "hour-cols hour-times");
-    hours.forEach(function (h) {
-      var t = el("span", "hour-time" + (h.hour === nowHour ? " now" : ""), h.hour === nowHour ? "Now" : pad(h.hour));
-      t.setAttribute("aria-hidden", "true");
-      times.appendChild(t);
-    });
-    track.appendChild(times);
     track.appendChild(svg);
 
     var cols = el("div", "hour-cols");
     var maxMm = Math.max(2, Math.max.apply(null, hours.map(function (h) { return h.mm || 0; })));
     hours.forEach(function (h) {
-      var col = el("div", "hour-col" + (h.hour === nowHour ? " now" : ""));
-      col.setAttribute("aria-label", pad(h.hour) + ": " + h.word.toLowerCase() + ", " + Math.round(h.temp) + " degrees, " +
-        (h.mm >= 0.1 ? h.mm : 0) + " millimetres, wind " + (h.wind === null ? "unknown" : h.wind + " metres per second"));
+      var mm = h.mm >= 0.1 ? Math.round(h.mm * 10) / 10 : 0;
+      var col = el("div", "hour-col" + (h.now ? " now" : ""));
       col.setAttribute("role", "group");
+      col.setAttribute("aria-label", (h.now ? "Now" : h.time) + ": " + h.word.toLowerCase() + ", " + Math.round(h.temp) + " degrees, " +
+        mm + " millimetres, wind " + (h.wind === null || h.wind === undefined ? "unknown" : h.wind + " metres per second"));
       var w = el("span", "hour-word", h.word); w.setAttribute("data-w", h.word); w.setAttribute("aria-hidden", "true");
       col.appendChild(w);
       var barBox = el("div", "rain-bar-box"); barBox.setAttribute("aria-hidden", "true");
-      var mm = h.mm >= 0.1 ? h.mm : 0;
       if (mm > 0) {
         var bar = el("div", "rain-bar");
         bar.style.height = Math.max(3, Math.round((mm / maxMm) * 100)) + "%";
@@ -207,19 +178,31 @@
       col.appendChild(barBox);
       var r = el("span", "hour-small hour-rain" + (mm >= 1 ? " wet" : ""), mm + " mm"); r.setAttribute("aria-hidden", "true");
       col.appendChild(r);
-      var wd = el("span", "hour-small", h.wind === null ? "– m/s" : h.wind + " m/s"); wd.setAttribute("aria-hidden", "true");
+      var wd = el("span", "hour-small", h.wind === null || h.wind === undefined ? "– m/s" : h.wind + " m/s"); wd.setAttribute("aria-hidden", "true");
       col.appendChild(wd);
       cols.appendChild(col);
     });
     track.appendChild(cols);
     scroller.appendChild(track);
-    panel.appendChild(scroller);
-
-    // Start at now (today) or 06 (other days). Set directly, never smooth-scrolled (iPhone taps).
-    var startHour = nowHour >= 0 ? Math.max(0, nowHour - 1) : 6;
-    var idx = 0;
-    hours.forEach(function (h, i) { if (h.hour <= startHour) idx = i; });
+    // Jump straight to the start column, never smooth-scrolled (iPhone taps).
+    var idx = Math.min(startIdx || 0, hours.length - 1);
     requestAnimationFrame(function () { scroller.scrollLeft = idx * COL; });
+    return scroller;
+  }
+
+  // A tapped day: starts at now (today) or 06 (other days).
+  function hourPanel(day) {
+    var panel = el("div", "day-hours");
+    var d = parseDate(day.date);
+    var name = FULL[(d.getUTCDay() + 6) % 7] + " " + d.getUTCDate();
+    panel.appendChild(el("p", "day-hours-title", name + ", hour by hour"));
+    var nowHour = day.today ? placeHour() : -1;
+    var items = day.hours.filter(function (h) { return h.temp !== null; }).map(function (h) {
+      return { time: pad(h.hour), now: h.hour === nowHour, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, hour: h.hour };
+    });
+    var startHour = nowHour >= 0 ? Math.max(0, nowHour - 1) : 6, idx = 0;
+    items.forEach(function (h, i) { if (h.hour <= startHour) idx = i; });
+    panel.appendChild(hourChart(items, name, idx));
     return panel;
   }
 
@@ -465,21 +448,16 @@
       ? "High " + deg(Math.max.apply(null, temps)) + " · low " + deg(Math.min.apply(null, temps)) + " · " + agree
       : agree;
 
-    // Today hour by hour: now, then every second hour.
-    var cells = [];
-    for (var k = 0; k < 6; k++) {
-      var h = byT[slot + k * 2 * HOUR];
-      if (!h) continue;
-      cells.push({
-        time: k === 0 ? "Now" : clock(h.t).hh,
-        word: h.word,
-        temp: deg(h.temp),
-        rain: mmText(h.mm),
-        wet: h.mm !== null && h.mm >= 1,
-        wind: h.wind === null ? "– m/s" : h.wind + " m/s"
-      });
-    }
-    renderHours(cells);
+    // Today hour by hour: every hour of today and on through the next 24, opening at now.
+    var until = slot + 24 * HOUR, nowIdx = 0;
+    var items = hours.filter(function (h) { return h.t <= until && h.temp !== null && h.temp !== undefined; }).map(function (h, i) {
+      var c = clock(h.t);
+      if (h.t === slot) nowIdx = i;
+      var nextDay = c.day !== local.day && c.hour === 0;
+      return { time: nextDay ? DOW[(dowIndex + 1) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word };
+    });
+    hoursEl.textContent = "";
+    hoursEl.appendChild(hourChart(items, "Today", Math.max(0, nowIdx - 1)));
 
     // Rain line: rest of today, or tonight once it's evening.
     var evening = local.hour >= 18;
