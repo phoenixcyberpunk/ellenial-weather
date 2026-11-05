@@ -9,6 +9,7 @@ const openMeteo = require("../lib/sources/openmeteo");
 const smhiObserved = require("../lib/sources/smhiObs");
 const { combine } = require("../lib/combine");
 const { buildDays, localClock } = require("../lib/days");
+const { runsOwnModel } = require("../lib/domains");
 
 const HOUR = 3600 * 1000;
 const GOTHENBURG = { lat: 57.71, lon: 11.97 };
@@ -50,14 +51,24 @@ module.exports = async (req, res) => {
   const status = [];
   const note = (id, name, r) => status.push({ id, name, ok: r.status === "fulfilled", error: r.status === "rejected" ? reason(r) : undefined });
 
-  note("smhi", "SMHI", smhiRes);
-  if (smhiRes.status === "fulfilled") sources.push(smhiRes.value);
-  note("met", "MET Norway", metRes);
-  if (metRes.status === "fulfilled") sources.push(metRes.value);
+  // SMHI, MET Norway and DMI only count where they run their own model; elsewhere they're ECMWF again.
+  const copiesEcmwf = (id) => !runsOwnModel(id, lat, lon);
+  const COPY = "built on ECMWF here, so counted once as ECMWF";
+  if (copiesEcmwf("smhi")) status.push({ id: "smhi", name: "SMHI", ok: false, error: COPY });
+  else {
+    note("smhi", "SMHI", smhiRes);
+    if (smhiRes.status === "fulfilled") sources.push(smhiRes.value);
+  }
+  if (copiesEcmwf("met")) status.push({ id: "met", name: "MET Norway", ok: false, error: COPY });
+  else {
+    note("met", "MET Norway", metRes);
+    if (metRes.status === "fulfilled") sources.push(metRes.value);
+  }
   let timezone = null;
   if (omRes.status === "fulfilled") {
     timezone = omRes.value.timezone;
     for (const m of omRes.value.models) {
+      if (copiesEcmwf(m.id)) { status.push({ id: m.id, name: m.name, ok: false, error: COPY }); continue; }
       const ok = m.hours.length > 0;
       status.push({ id: m.id, name: m.name, ok, error: ok ? undefined : "no data" });
       if (ok) sources.push(m);
