@@ -123,12 +123,14 @@
     }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
   }
 
-  function open() {
+  // The keyboard only comes up when someone taps the box. Opened with a real keyboard
+  // (Enter/Space on the button, so the click has no pointer), focus goes straight to the box.
+  function open(byKeyboard) {
     panel.hidden = false;
     button.setAttribute("aria-expanded", "true");
     input.value = "";
     showRecent();
-    input.focus();
+    if (byKeyboard) input.focus();
   }
   function close(returnFocus) {
     if (!panel || panel.hidden) return;
@@ -174,7 +176,7 @@
     panel.appendChild(list);
     document.querySelector(".top").insertAdjacentElement("afterend", panel);
 
-    button.addEventListener("click", function () { panel.hidden ? open() : close(true); });
+    button.addEventListener("click", function (e) { panel.hidden ? open(e.detail === 0) : close(true); });
     input.addEventListener("input", onInput);
     input.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
