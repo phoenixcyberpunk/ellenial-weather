@@ -173,7 +173,7 @@ a:hover { text-decoration-thickness: 2px; }
   .week-word { font-size: 9.5px; }
   .stat { padding: 10px 10px; }
   .stat-value { font-size: 19px; }
-  .forecast-stack > .normals { padding: 14px 18px; border-radius: 20px; }
+  .forecast-stack > .normals { border-radius: 16px; }
   /* Forecast on about one screen: Right now as one row (temperature left, hours right),
      the three weeks side by side, the usual week as a slim strip. */
   .forecast-stack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
@@ -186,9 +186,14 @@ a:hover { text-decoration-thickness: 2px; }
   .forecast-stack > .card:first-child > .now { grid-area: now; flex-direction: column; align-items: flex-start; gap: 10px; }
   .forecast-stack > .card:first-child > .hours { grid-area: hours; min-height: 0; }
   .forecast-stack > .card:first-child > .rain { grid-area: rain; }
-  .forecast-stack > .normals { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 28px; row-gap: 6px; }
-  .forecast-stack > .normals .stats { flex: 0 1 460px; }
-  .forecast-stack > .normals .link-button { margin-left: auto; }
+  /* The usual week as one slim line, text the same size as the week tables, link beside it. */
+  .forecast-stack > .normals { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 32px; row-gap: 4px; padding: 8px 18px; }
+  .forecast-stack > .normals .stats { display: flex; gap: 24px; }
+  .forecast-stack > .normals .stat { flex-direction: row; align-items: baseline; gap: 8px; padding: 0; background: none; }
+  .forecast-stack > .normals .stat-name { font-size: 12px; }
+  .forecast-stack > .normals .stat-value { font-size: 17px; }
+  .forecast-stack > .normals .label { font-size: 12px; }
+  .forecast-stack > .normals .link-button { font-size: 13px; min-height: 36px; }
   #weeks { display: contents !important; }
   .forecast-stack > *, .usually-stack > * { min-width: 0; }
   /* What usually happens: cards side by side, the climate comparison across the bottom. */
