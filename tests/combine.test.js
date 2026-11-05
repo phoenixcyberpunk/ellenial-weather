@@ -52,3 +52,14 @@ test("sun is up at noon and down at midnight in Gothenburg in late October", () 
   assert.ok(sunElevation(Date.UTC(2026, 9, 29, 10, 30) - H / 2, 57.71, 11.97) > 10);
   assert.ok(sunElevation(Date.UTC(2026, 9, 29, 23), 57.71, 11.97) < -20);
 });
+
+test("thunder needs two forecasts and a third of the votes", () => {
+  const base = { temp: 14, mm: 2, rainShare: 1, wind: 5, cloud: 100, day: true };
+  assert.strictEqual(weatherWord({ ...base, thunderVotes: 2, thunderShare: 0.4 }), "THUNDER");
+  assert.strictEqual(weatherWord({ ...base, thunderVotes: 1, thunderShare: 1 }), "RAIN");
+  assert.strictEqual(weatherWord({ ...base, thunderVotes: 2, thunderShare: 0.3 }), "RAIN");
+  const sources = ["a", "b", "c", "d", "e"].map((id, i) => ({ id, hours: [{ t: T0, temp: 15, cloud: 100, thunder: i < 2 }] }));
+  const [h] = combine(sources, 57.71, 11.97);
+  assert.strictEqual(h.thunderVotes, 2);
+  assert.strictEqual(h.word, "THUNDER");
+});

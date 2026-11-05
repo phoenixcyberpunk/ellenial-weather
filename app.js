@@ -112,9 +112,9 @@
   // Weather icons, hand-drawn by Ellen in Procreate (art/weather-icons). The icon is decoration:
   // the words around it (aria-labels, the "Sunny and mild" line) always say the same thing.
   // Partly cloudy and clear show the moon after dark. On breezy hours that aren't already
-  // "windy", a little wind spiral sits in the corner, so the sun or cloud is never hidden.
+  // "windy", a little wind spiral sits in the corner of the sun or cloud, so they're never hidden.
   var BREEZE = 6; // m/s; WIND (the big swoops) starts at 10, set in lib/combine.js
-  var SPOKEN = { SUN: "sunny", CLEAR: "clear", MIX: "partly cloudy", CLOUDY: "grey", RAIN: "rain", SNOW: "snow", WIND: "windy" };
+  var SPOKEN = { THUNDER: "thunder", SUN: "sunny", CLEAR: "clear", MIX: "partly cloudy", CLOUDY: "grey", RAIN: "rain", SNOW: "snow", WIND: "windy" };
   function iconName(word, day) {
     if (word === "SUN") return "sun";
     if (word === "CLEAR") return "clear";
@@ -123,9 +123,11 @@
     if (word === "RAIN") return "rain";
     if (word === "SNOW") return "snow";
     if (word === "WIND") return "wind";
+    if (word === "THUNDER") return "thunder";
     return null;
   }
-  function isBreezy(word, wind) { return word !== "WIND" && wind !== null && wind !== undefined && wind >= BREEZE; }
+  var CALM = { SUN: 1, CLEAR: 1, MIX: 1, CLOUDY: 1 }; // the badge sits on the sun or cloud only, never on rain, snow or thunder
+  function isBreezy(word, wind) { return CALM[word] === 1 && wind !== null && wind !== undefined && wind >= BREEZE; }
   function spokenWeather(word, wind) {
     return (SPOKEN[word] || "changeable") + (isBreezy(word, wind) ? ", breezy" : "");
   }
@@ -461,7 +463,7 @@
     };
   }
 
-  var WORDS = { SUN: "Sunny", CLEAR: "Clear", MIX: "Partly cloudy", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
+  var WORDS = { THUNDER: "Thundery", SUN: "Sunny", CLEAR: "Clear", MIX: "Partly cloudy", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
 
   function feel(temp) {
     if (temp <= 0) return "frosty";
