@@ -136,25 +136,90 @@
     return e;
   }
 
+  // A tapped day: every hour as a chart you can scroll sideways. Temperature is a line with its
+  // value written above each point; rain is a bar with the mm written under it (never colour alone).
+  var COL = 52, LINE_H = 56;
+  var placeHour = function () { return new Date().getHours(); }; // replaced by the place's own clock once data arrives
   function hourPanel(day) {
     var panel = el("div", "day-hours");
     var d = parseDate(day.date);
-    panel.appendChild(el("p", "day-hours-title", FULL[(d.getUTCDay() + 6) % 7] + " " + d.getUTCDate() + ", hour by hour"));
-    var grid = el("div", "day-hours-grid");
-    day.hours.forEach(function (h) {
-      var box = el("div", "hour");
-      box.appendChild(el("span", "hour-time", pad(h.hour)));
-      var w = el("span", "hour-word", h.temp === null ? "–" : h.word);
-      if (h.temp !== null) w.setAttribute("data-w", h.word);
-      box.appendChild(w);
-      box.appendChild(el("span", "hour-temp", h.temp === null ? "–" : Math.round(h.temp) + "°"));
-      var r = el("span", "hour-small hour-rain", h.mm === null || h.mm === undefined ? "– mm" : (h.mm >= 0.1 ? h.mm : 0) + " mm");
-      if (h.mm >= 1) r.classList.add("wet");
-      box.appendChild(r);
-      box.appendChild(el("span", "hour-small", h.wind === null || h.wind === undefined ? "– m/s" : h.wind + " m/s"));
-      grid.appendChild(box);
+    var name = FULL[(d.getUTCDay() + 6) % 7] + " " + d.getUTCDate();
+    panel.appendChild(el("p", "day-hours-title", name + ", hour by hour"));
+    var hours = day.hours.filter(function (h) { return h.temp !== null; });
+    var scroller = el("div", "hour-scroll");
+    scroller.setAttribute("role", "region");
+    scroller.setAttribute("aria-label", name + ", every hour. Scroll sideways.");
+    scroller.tabIndex = 0;
+    var track = el("div", "hour-track");
+    track.style.width = hours.length * COL + "px";
+
+    // Temperature line across the columns.
+    var temps = hours.map(function (h) { return h.temp; });
+    var hi = Math.max.apply(null, temps), lo = Math.min.apply(null, temps), span = Math.max(hi - lo, 4);
+    var mid = (hi + lo) / 2;
+    function y(t) { return Math.round(LINE_H / 2 - ((t - mid) / span) * (LINE_H - 30)) + 8; }
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "hour-line");
+    svg.setAttribute("width", hours.length * COL);
+    svg.setAttribute("height", LINE_H + 8);
+    svg.setAttribute("aria-hidden", "true");
+    var pts = hours.map(function (h, i) { return (i * COL + COL / 2) + "," + y(h.temp); });
+    var poly = document.createElementNS(NS, "polyline");
+    poly.setAttribute("points", pts.join(" "));
+    svg.appendChild(poly);
+    hours.forEach(function (h, i) {
+      var cx = i * COL + COL / 2, cy = y(h.temp);
+      var dot = document.createElementNS(NS, "circle");
+      dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("r", 3.5);
+      svg.appendChild(dot);
+      var txt = document.createElementNS(NS, "text");
+      txt.setAttribute("x", cx); txt.setAttribute("y", cy - 8);
+      txt.textContent = Math.round(h.temp) + "°";
+      svg.appendChild(txt);
     });
-    panel.appendChild(grid);
+    var nowHour = day.today ? placeHour() : -1;
+    var times = el("div", "hour-cols hour-times");
+    hours.forEach(function (h) {
+      var t = el("span", "hour-time" + (h.hour === nowHour ? " now" : ""), h.hour === nowHour ? "Now" : pad(h.hour));
+      t.setAttribute("aria-hidden", "true");
+      times.appendChild(t);
+    });
+    track.appendChild(times);
+    track.appendChild(svg);
+
+    var cols = el("div", "hour-cols");
+    var maxMm = Math.max(2, Math.max.apply(null, hours.map(function (h) { return h.mm || 0; })));
+    hours.forEach(function (h) {
+      var col = el("div", "hour-col" + (h.hour === nowHour ? " now" : ""));
+      col.setAttribute("aria-label", pad(h.hour) + ": " + h.word.toLowerCase() + ", " + Math.round(h.temp) + " degrees, " +
+        (h.mm >= 0.1 ? h.mm : 0) + " millimetres, wind " + (h.wind === null ? "unknown" : h.wind + " metres per second"));
+      col.setAttribute("role", "group");
+      var w = el("span", "hour-word", h.word); w.setAttribute("data-w", h.word); w.setAttribute("aria-hidden", "true");
+      col.appendChild(w);
+      var barBox = el("div", "rain-bar-box"); barBox.setAttribute("aria-hidden", "true");
+      var mm = h.mm >= 0.1 ? h.mm : 0;
+      if (mm > 0) {
+        var bar = el("div", "rain-bar");
+        bar.style.height = Math.max(3, Math.round((mm / maxMm) * 100)) + "%";
+        barBox.appendChild(bar);
+      }
+      col.appendChild(barBox);
+      var r = el("span", "hour-small hour-rain" + (mm >= 1 ? " wet" : ""), mm + " mm"); r.setAttribute("aria-hidden", "true");
+      col.appendChild(r);
+      var wd = el("span", "hour-small", h.wind === null ? "– m/s" : h.wind + " m/s"); wd.setAttribute("aria-hidden", "true");
+      col.appendChild(wd);
+      cols.appendChild(col);
+    });
+    track.appendChild(cols);
+    scroller.appendChild(track);
+    panel.appendChild(scroller);
+
+    // Start at now (today) or 06 (other days). Set directly, never smooth-scrolled (iPhone taps).
+    var startHour = nowHour >= 0 ? Math.max(0, nowHour - 1) : 6;
+    var idx = 0;
+    hours.forEach(function (h, i) { if (h.hour <= startHour) idx = i; });
+    requestAnimationFrame(function () { scroller.scrollLeft = idx * COL; });
     return panel;
   }
 
@@ -454,6 +519,7 @@
 
     document.getElementById("loading").hidden = true;
     observedSlow = !!data.observedSlow;
+    placeHour = function () { return clock(Date.now()).hour; };
     if (data.days && data.days.length === 21) renderWeeks(data.days, data.observedAt);
 
     var okCount = data.sources.filter(function (s) { return s.ok; }).length;

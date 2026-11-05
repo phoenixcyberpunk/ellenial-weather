@@ -34,15 +34,15 @@ function fakeForecast() {
   });
 }
 
-test("forecast days get a summary, How sure, and five hours", () => {
+test("forecast days get a summary, How sure, and every hour", () => {
   const hours = combine(fakeForecast(), 57.71, 11.97);
   const days = buildDays(hours, null, TZ, NOW);
   const today = days.find((d) => d.today);
   assert.strictEqual(today.date, "2026-10-29");
   assert.ok(today.hi > today.lo);
   assert.strictEqual(today.sure, 3);
-  assert.strictEqual(today.hours.length, 5);
-  assert.deepStrictEqual(today.hours.map((h) => h.hour), [6, 10, 14, 18, 22]);
+  assert.strictEqual(today.hours.length, 24);
+  assert.deepStrictEqual(today.hours.map((h) => h.hour), Array.from({ length: 24 }, (_, i) => i));
 
   const sat = days.find((d) => d.date === "2026-10-31");
   assert.strictEqual(sat.word, "RAIN");
