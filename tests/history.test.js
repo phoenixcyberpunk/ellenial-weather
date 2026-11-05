@@ -162,3 +162,18 @@ test("south of the equator, frost seasons run January to December", () => {
   assert.strictEqual(f.lastSpring.typical.month, 8);
   assert.strictEqual(f.nightsPerYear, 3);
 });
+
+test("UV months wrap past December south of the equator", () => {
+  const { uvByMonth } = require("../lib/history");
+  const days = [];
+  for (let y = 2022; y <= 2024; y++) {
+    for (let m = 1; m <= 12; m++) {
+      for (let d = 1; d <= 28; d++) {
+        days.push({ date: `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`, uv: m >= 5 && m <= 7 ? 2 : 6 });
+      }
+    }
+  }
+  const uv = uvByMonth(days);
+  assert.strictEqual(uv.careFrom, 8);
+  assert.strictEqual(uv.careTo, 4);
+});
