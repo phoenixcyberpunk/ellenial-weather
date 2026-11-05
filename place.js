@@ -150,12 +150,12 @@
     panel = el("div", "place-panel");
     panel.id = "place-panel";
     panel.hidden = true;
-    var label = el("label", "sr-only", "Search for a town or village");
+    var label = el("label", "sr-only", "Location");
     label.htmlFor = "place-input";
     input = el("input", "place-input");
     input.id = "place-input";
     input.type = "search";
-    input.placeholder = "Town or village";
+    input.placeholder = "Location";
     input.autocomplete = "off";
     input.setAttribute("enterkeyhint", "search");
     input.setAttribute("spellcheck", "false");
