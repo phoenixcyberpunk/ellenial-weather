@@ -368,3 +368,9 @@ table.change td:last-child { font-weight: 700; }
 .hour-icon { width: 30px; height: 30px; margin: 2px 0; }
 .week-icon { width: 28px; height: 28px; vertical-align: middle; }
 @media (max-width: 380px) { .week-icon { width: 24px; height: 24px; } }
+
+/* Ellen's drawings beside the What usually happens card titles */
+.title-with-icon { display: flex; align-items: center; gap: 8px; }
+.title-icon { width: 30px; height: 30px; flex: none; }
+.strip-mark img { width: 18px; height: 18px; display: block; }
+.strip-mark { min-height: 18px; }

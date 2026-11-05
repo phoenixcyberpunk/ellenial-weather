@@ -102,7 +102,9 @@
       var frosty = startM !== null && endM !== null && pos(m) >= pos(startM) && pos(m) <= pos(endM);
       if (frosty) on.push(MONTH[m - 1]);
       var cell = el("div", "strip-cell" + (frosty ? " frosty" : "") + (m === thisMonth ? " now" : ""));
-      cell.appendChild(el("span", "strip-mark", frosty ? "❄" : ""));
+      var mark = el("span", "strip-mark");
+      if (frosty) { var flake = el("img"); flake.src = "icons/w/frost.png"; flake.alt = ""; mark.appendChild(flake); } // Ellen's frost flake
+      cell.appendChild(mark);
       cell.appendChild(el("span", "strip-label", LETTER[m - 1]));
       wrap.appendChild(cell);
     });
@@ -172,7 +174,7 @@
     card.appendChild(el("p", "uv-legend", "Days with 6 h+ of sun"));
     var best = months.slice().sort(function (a, b) { return b.sunnyDays - a.sunnyDays; })[0];
     var cur = months[thisMonth - 1];
-    card.appendChild(el("p", "section-text", MONTH[thisMonth - 1] + " usually has " + cur.sunnyDays + " sunny days, about " +
+    card.appendChild(el("p", "section-text", MONTH[thisMonth - 1] + " usually has " + cur.sunnyDays + (cur.sunnyDays === 1 ? " sunny day" : " sunny days") + ", about " +
       cur.hoursPerDay + " h of sun a day. Sunniest: " + MONTH[best.month - 1] + " (" + best.sunnyDays + ")."));
     if (h.sources.sun.kind === "model") {
       card.appendChild(el("p", "caveat", "No sunshine station near here; the model reads sunnier than real."));
