@@ -6,7 +6,6 @@
 (function () {
   "use strict";
 
-  var PLACE = { lat: 57.7, lon: 12.0 }; // history is shared per 0.1°
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   var MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   var LETTER = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
@@ -260,8 +259,28 @@
     $("usually-loading").textContent = "The weather history couldn't be reached. Try again in a little while.";
   }
 
-  fetch("/api/history?lat=" + PLACE.lat + "&lon=" + PLACE.lon)
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(render)
-    .catch(fail);
+  // History is shared per 0.1° (about 10 km), so nearby places use one cached answer.
+  var loadSeq = 0;
+  function load() {
+    var place = window.EllenialPlace.get(), mine = ++loadSeq;
+    var lat = Math.round(place.lat * 10) / 10, lon = Math.round(place.lon * 10) / 10;
+    fetch("/api/history?lat=" + lat + "&lon=" + lon)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (h) { if (mine === loadSeq) render(h); })
+      .catch(function () { if (mine === loadSeq) fail(); });
+  }
+
+  window.EllenialPlace.onChange(function () {
+    var loading = $("usually-loading");
+    loading.textContent = "Going through 35 years of weather…";
+    loading.hidden = false;
+    ["u-frost", "u-sun-card", "u-uv", "u-change"].forEach(function (id) { clearAfter($(id), 1); });
+    ["u-temp", "u-rain", "u-sun"].forEach(function (id) { $(id).textContent = "–"; });
+    $("u-week-note").textContent = "";
+    $("normals-title").textContent = "After the forecasts end";
+    $("normals-stats").hidden = true;
+    load();
+  });
+
+  load();
 })();

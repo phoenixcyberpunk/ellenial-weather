@@ -356,7 +356,6 @@
 
   // ---- Forecast: right now, today hour by hour, the rain line -----------
   var HOUR = 3600 * 1000;
-  var PLACE = { name: "Gothenburg", lat: 57.71, lon: 11.97 };
 
   var nowCard = {
     temp: document.querySelector(".now-temp"),
@@ -430,6 +429,9 @@
     var slot = Math.floor(nowT / HOUR) * HOUR;
     var now = byT[slot] || hours.filter(function (h) { return h.t <= nowT; }).pop() || hours[0];
     var local = clock(nowT);
+    var ld = parseDate(local.day);
+    document.getElementById("today-label").textContent =
+      DOW[(ld.getUTCDay() + 6) % 7] + " " + ld.getUTCDate() + " " + MONTHS[ld.getUTCMonth()];
 
     // Right now
     nowCard.temp.textContent = deg(now.temp);
@@ -510,8 +512,28 @@
     document.getElementById("loading").textContent = "The forecasts couldn't be reached. Try again in a little while.";
   }
 
-  fetch("/api/forecast?lat=" + PLACE.lat + "&lon=" + PLACE.lon)
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(render)
-    .catch(fail);
+  // Load the forecast for the chosen place; a newer load wins if the place changes mid-way.
+  var loadSeq = 0;
+  function load() {
+    var place = window.EllenialPlace.get(), mine = ++loadSeq;
+    fetch("/api/forecast?lat=" + place.lat + "&lon=" + place.lon)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (data) { if (mine === loadSeq) render(data); })
+      .catch(function () { if (mine === loadSeq) fail(); });
+  }
+
+  window.EllenialPlace.onChange(function () {
+    var loading = document.getElementById("loading");
+    loading.textContent = "Fetching six forecasts…";
+    loading.hidden = false;
+    nowCard.temp.textContent = "–°";
+    nowCard.line.textContent = "Fetching the forecasts…";
+    nowCard.sub.textContent = "High – · low –";
+    hoursEl.textContent = "";
+    rainToggle.disabled = true;
+    renderWeeks(placeholderDays(), null);
+    load();
+  });
+
+  load();
 })();
