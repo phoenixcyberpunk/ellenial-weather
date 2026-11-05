@@ -31,7 +31,7 @@
 
   <!-- Forecast: opens first. Today is the main feature. -->
   <section id="view-forecast" role="tabpanel" aria-labelledby="tab-forecast">
-    <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="view-stack forecast-stack">
 
       <article class="card" aria-labelledby="now-label">
         <h2 class="label" id="now-label">Right now</h2>
@@ -73,7 +73,7 @@
 
   <!-- What usually happens: odds from past weather, never predictions. -->
   <section id="view-usually" role="tabpanel" aria-labelledby="tab-usually" hidden>
-    <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="view-stack usually-stack">
 
       <p id="usually-loading" class="loading" role="status">Going through 35 years of weather…</p>
 

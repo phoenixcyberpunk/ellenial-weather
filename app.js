@@ -189,11 +189,13 @@
     // A chart that runs past midnight gets a day label above it that follows the scroll,
     // so it always names the day you're looking at ("Thu 5 Nov" → "Fri 6 Nov").
     var days = hours.map(function (h) { return h.day; });
-    if (!days[0] || days.every(function (d) { return d === days[0]; })) return scroller;
+    var multiDay = days[0] && days.some(function (d) { return d !== days[0]; });
     var wrap = el("div", "hour-chart");
-    var dayEl = el("p", "hour-day", days[idx]);
-    dayEl.setAttribute("aria-live", "polite");
+    var top = el("div", "hour-top" + (multiDay ? "" : " only-nav"));
+    var dayEl = el("p", "hour-day", multiDay ? days[idx] : "");
+    if (multiDay) dayEl.setAttribute("aria-live", "polite");
     function follow() {
+      if (!multiDay) return;
       // The day of the column in the middle of what's showing.
       var mid = Math.floor((scroller.scrollLeft + scroller.clientWidth / 2) / COL);
       var d = days[Math.max(0, Math.min(days.length - 1, mid))];
@@ -201,7 +203,30 @@
     }
     scroller.addEventListener("scroll", follow, { passive: true });
     requestAnimationFrame(follow);
-    wrap.appendChild(dayEl);
+    top.appendChild(dayEl);
+
+    // Earlier / later buttons for a mouse, which can't swipe sideways. Shown only where the
+    // pointer is a mouse or trackpad (CSS), so phones keep the plain swipe.
+    var nav = el("div", "hour-nav");
+    [["‹", "Earlier hours", -1], ["›", "Later hours", 1]].forEach(function (b) {
+      var btn = el("button", "hour-nav-btn", b[0]);
+      btn.type = "button";
+      btn.setAttribute("aria-label", b[1]);
+      btn.addEventListener("click", function () {
+        var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        scroller.scrollBy({ left: b[2] * Math.max(COL, Math.floor(scroller.clientWidth / COL) - 1) * COL, behavior: still ? "auto" : "smooth" });
+      });
+      nav.appendChild(btn);
+    });
+    function edges() {
+      nav.children[0].disabled = scroller.scrollLeft <= 2;
+      nav.children[1].disabled = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 2;
+    }
+    scroller.addEventListener("scroll", edges, { passive: true });
+    requestAnimationFrame(edges);
+    top.appendChild(nav);
+
+    wrap.appendChild(top);
     wrap.appendChild(scroller);
     return wrap;
   }

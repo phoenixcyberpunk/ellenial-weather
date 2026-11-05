@@ -131,9 +131,45 @@ a:hover { text-decoration-thickness: 2px; }
 .now-sub { font-size: 13px; color: var(--muted); }
 
 .hours { min-height: 186px; }
-.hours .hour-chart { display: flex; flex-direction: column; gap: 6px; }
 .hour-day { margin: 0; padding: 0 2px; font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
-.hour-scroll { background: var(--soft); }
+.view-stack { display: flex; flex-direction: column; gap: 16px; }
+.hour-chart { display: flex; flex-direction: column; gap: 6px; }
+.hour-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hour-top.only-nav { display: none; }
+.hour-nav { display: none; gap: 4px; }
+.hour-nav-btn {
+  font: inherit; font-size: 18px; line-height: 1; color: var(--ink); background: var(--card);
+  border: 1.5px solid var(--edge); border-radius: 999px; width: 36px; height: 32px; cursor: pointer;
+}
+.hour-nav-btn:hover:not(:disabled) { background: var(--peri); color: var(--on-peri); border-color: var(--accent); }
+.hour-nav-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.hour-nav-btn:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
+/* Mouse and trackpad: show the earlier/later buttons and give things a hover state. */
+@media (hover: hover) and (pointer: fine) {
+  .hour-nav { display: flex; }
+  .hour-top.only-nav { display: flex; justify-content: flex-end; }
+  .day-btn:hover:not(:disabled), .week td.tappable:hover { background: var(--soft); }
+  .place-option:hover { background: var(--soft); }
+  .tab:hover:not([aria-selected="true"]) { color: var(--ink); }
+  .place:hover, .place-geo:hover { border-color: var(--accent); }
+}
+
+/* Computers and tablets on their side: a wider page that uses the room. One page for
+   everyone, same address; nothing about data or accounts changes. */
+@media (min-width: 900px) {
+  .page { max-width: 1040px; padding: 36px 28px 48px; gap: 20px; }
+  .tabs { max-width: 460px; }
+  .place-panel { align-self: flex-end; width: 420px; }
+  .now-temp { font-size: 84px; }
+  .now-line { font-size: 18px; }
+  .week th, .week td { font-size: 15px; }
+  .week-word { font-size: 11.5px; }
+  .week-hi { font-size: 21px; }
+  /* What usually happens: cards side by side, the climate comparison across the bottom. */
+  .usually-stack { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .usually-stack > .loading, .usually-stack > #u-change { grid-column: 1 / -1; }
+}
+
 .hour { display: flex; flex-direction: column; gap: 5px; align-items: center; padding: 9px 2px; border-radius: 12px; background: var(--soft); }
 .hour-time { font-size: 12px; font-weight: 700; color: var(--muted); }
 .hour-temp { font-family: var(--serif); font-size: 18px; }
@@ -210,6 +246,7 @@ a:hover { text-decoration-thickness: 2px; }
 .day-hours { display: flex; flex-direction: column; gap: 8px; background: var(--soft); border-radius: 16px; padding: 12px 10px; }
 .day-hours-title { margin: 0; font-size: 14px; font-weight: 700; }
 .hour-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; overscroll-behavior-x: contain; border-radius: 12px; background: var(--card); scrollbar-width: thin; }
+.hours .hour-scroll { background: var(--soft); }
 .hour-scroll:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .hour-track { position: relative; padding: 4px 0 8px;
   /* a faint line between hours, so each column reads top to bottom (decorative only) */
