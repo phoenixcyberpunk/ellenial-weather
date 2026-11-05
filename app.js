@@ -109,6 +109,40 @@
     return e;
   }
 
+  // Weather icons, hand-drawn by Ellen in Procreate (art/weather-icons). The icon is decoration:
+  // the words around it (aria-labels, the "Sunny and mild" line) always say the same thing.
+  // Partly cloudy and clear show the moon after dark. On breezy hours that aren't already
+  // "windy", a little wind spiral sits in the corner, so the sun or cloud is never hidden.
+  var BREEZE = 6; // m/s; WIND (the big swoops) starts at 10, set in lib/combine.js
+  var SPOKEN = { SUN: "sunny", CLEAR: "clear", MIX: "partly cloudy", CLOUDY: "grey", RAIN: "rain", SNOW: "snow", WIND: "windy" };
+  function iconName(word, day) {
+    if (word === "SUN") return "sun";
+    if (word === "CLEAR") return "clear";
+    if (word === "MIX") return day === false ? "mix-night" : "mix-day";
+    if (word === "CLOUDY") return "cloudy";
+    if (word === "RAIN") return "rain";
+    if (word === "SNOW") return "snow";
+    if (word === "WIND") return "wind";
+    return null;
+  }
+  function isBreezy(word, wind) { return word !== "WIND" && wind !== null && wind !== undefined && wind >= BREEZE; }
+  function spokenWeather(word, wind) {
+    return (SPOKEN[word] || "changeable") + (isBreezy(word, wind) ? ", breezy" : "");
+  }
+  function weatherIcon(word, day, wind, cls) {
+    var box = el("span", "w-icon" + (cls ? " " + cls : ""));
+    box.setAttribute("aria-hidden", "true");
+    var name = iconName(word, day);
+    if (!name) { box.textContent = "–"; return box; }
+    var img = el("img", "w-main"); img.src = "icons/w/" + name + ".png"; img.alt = ""; img.decoding = "async";
+    box.appendChild(img);
+    if (isBreezy(word, wind)) {
+      var b = el("img", "w-breeze"); b.src = "icons/w/breeze.png"; b.alt = ""; b.decoding = "async";
+      box.appendChild(b);
+    }
+    return box;
+  }
+
   // Hours as a chart you scroll sideways, used by the Today card and by a tapped day. Temperature
   // is a line with its value written above each point; rain is a bar with the mm written under it
   // (never colour alone). items: { time, now, temp, mm, wind, word }.
@@ -163,10 +197,9 @@
       var mm = h.mm >= 0.1 ? Math.round(h.mm * 10) / 10 : 0;
       var col = el("div", "hour-col" + (h.now ? " now" : ""));
       col.setAttribute("role", "group");
-      col.setAttribute("aria-label", (h.now ? "Now" : h.time) + ": " + h.word.toLowerCase() + ", " + Math.round(h.temp) + " degrees, " +
+      col.setAttribute("aria-label", (h.now ? "Now" : h.time) + ": " + spokenWeather(h.word, h.wind) + ", " + Math.round(h.temp) + " degrees, " +
         mm + " millimetres, wind " + (h.wind === null || h.wind === undefined ? "unknown" : h.wind + " metres per second"));
-      var w = el("span", "hour-word", h.word); w.setAttribute("data-w", h.word); w.setAttribute("aria-hidden", "true");
-      col.appendChild(w);
+      col.appendChild(weatherIcon(h.word, h.isDay, h.wind, "hour-icon"));
       var barBox = el("div", "rain-bar-box"); barBox.setAttribute("aria-hidden", "true");
       if (mm > 0) {
         var bar = el("div", "rain-bar");
@@ -239,7 +272,7 @@
     panel.appendChild(el("p", "day-hours-title", name + ", hour by hour"));
     var nowHour = day.today ? placeHour() : -1;
     var items = day.hours.filter(function (h) { return h.temp !== null; }).map(function (h) {
-      return { time: pad(h.hour), now: h.hour === nowHour, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, hour: h.hour };
+      return { time: pad(h.hour), now: h.hour === nowHour, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, isDay: h.day, hour: h.hour };
     });
     var startHour = nowHour >= 0 ? Math.max(0, nowHour - 1) : 6, idx = 0;
     items.forEach(function (h, i) { if (h.hour <= startHour) idx = i; });
@@ -331,8 +364,8 @@
         });
         tbody.appendChild(tr);
       }
-      row("Weather", function (d) { var c = el("span", "week-word", d.word); c.setAttribute("data-w", d.word); return c; },
-        function (d) { return d.word.toLowerCase(); });
+      row("Weather", function (d) { return weatherIcon(d.word, true, d.wind, "week-icon"); },
+        function (d) { return spokenWeather(d.word, d.wind); });
       row("Temperature", function (d) {
         var f = document.createDocumentFragment();
         f.appendChild(el("span", "week-hi", Math.round(d.hi) + "°"));
@@ -473,9 +506,9 @@
 
     // Right now
     nowCard.temp.textContent = deg(now.temp);
-    nowCard.chip.textContent = now.word;
-    nowCard.chip.setAttribute("data-w", now.word);
-    nowCard.line.textContent = (WORDS[now.word] || "Changeable") + " and " + feel(now.temp) +
+    nowCard.chip.textContent = "";
+    nowCard.chip.appendChild(weatherIcon(now.word, now.day, now.wind, "now-icon"));
+    nowCard.line.textContent = (WORDS[now.word] || "Changeable") + (isBreezy(now.word, now.wind) ? ", breezy" : "") + " and " + feel(now.temp) +
       (now.wind !== null ? " · " + now.wind + "\u00a0m/s" : "");
 
     var todayHours = hours.filter(function (h) { return clock(h.t).day === local.day; });
@@ -495,7 +528,7 @@
       if (h.t === slot) nowIdx = i;
       var nextDay = c.day !== local.day && c.hour === 0;
       var cd = parseDate(c.day);
-      return { time: nextDay ? DOW[(cd.getUTCDay() + 6) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word,
+      return { time: nextDay ? DOW[(cd.getUTCDay() + 6) % 7] : c.hh, now: h.t === slot, temp: h.temp, mm: h.mm, wind: h.wind, word: h.word, isDay: h.day,
         day: DOW[(cd.getUTCDay() + 6) % 7] + " " + cd.getUTCDate() + " " + MONTHS[cd.getUTCMonth()] };
     });
     hoursEl.textContent = "";

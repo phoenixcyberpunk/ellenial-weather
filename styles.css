@@ -356,3 +356,13 @@ table.change td:last-child { font-weight: 700; }
 .skeleton-note { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
 
 [hidden] { display: none !important; }
+
+/* Weather icons (Ellen's drawings, icons/w). Bright fills carry both themes, so no disc behind them. */
+.w-icon { position: relative; display: inline-block; flex: none; line-height: 0; }
+.w-icon .w-main { width: 100%; height: 100%; display: block; }
+.w-icon .w-breeze { position: absolute; width: 50%; height: 50%; right: -18%; bottom: -14%; }
+.now-icon-box { background: none; padding: 0; }
+.now-icon { width: 52px; height: 52px; }
+.hour-icon { width: 30px; height: 30px; margin: 2px 0; }
+.week-icon { width: 28px; height: 28px; vertical-align: middle; }
+@media (max-width: 380px) { .week-icon { width: 24px; height: 24px; } }
