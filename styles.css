@@ -226,7 +226,7 @@ a:hover { text-decoration-thickness: 2px; }
 .rain-bar-box { width: 18px; height: 28px; display: flex; align-items: flex-end; border-bottom: 1.5px solid var(--edge); }
 .rain-bar { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; }
 .hour-times .hour-time { flex: 0 0 52px; width: 52px; text-align: center; scroll-snap-align: start; padding-top: 6px; }
-.hour-time.now { color: var(--on-peri); background: var(--peri); border-radius: 6px; padding: 1px 0; margin: 5px 6px 0; flex-basis: 40px; width: 40px; text-align: center; }
+.hour-time.now { color: var(--on-peri); background: var(--peri); border-radius: 6px; padding: 1px 0; margin: 5px 6px 0; flex-basis: 40px; width: 40px; text-align: center; justify-content: center; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 

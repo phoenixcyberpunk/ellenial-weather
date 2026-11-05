@@ -518,7 +518,7 @@
     if (data.days && data.days.length === 21) renderWeeks(data.days, data.observedAt);
 
     var okCount = data.sources.filter(function (s) { return s.ok; }).length;
-    document.getElementById("source-count").textContent = "Combined from " + okCount + " forecasts. ";
+    document.getElementById("source-count").textContent = "Combined from " + okCount + (okCount === 1 ? " forecast. " : " forecasts. ");
   }
 
   function fail() {
