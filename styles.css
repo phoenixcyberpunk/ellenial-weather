@@ -187,13 +187,13 @@ a:hover { text-decoration-thickness: 2px; }
   .forecast-stack > .card:first-child > .hours { grid-area: hours; min-height: 0; }
   .forecast-stack > .card:first-child > .rain { grid-area: rain; }
   /* The usual week as one slim line, text the same size as the week tables, link beside it. */
-  .forecast-stack > .normals { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 32px; row-gap: 4px; padding: 8px 18px; }
+  .forecast-stack > .normals { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 28px; row-gap: 2px; padding: 4px 16px; }
   .forecast-stack > .normals .stats { display: flex; gap: 24px; }
   .forecast-stack > .normals .stat { flex-direction: row; align-items: baseline; gap: 8px; padding: 0; background: none; }
-  .forecast-stack > .normals .stat-name { font-size: 12px; }
-  .forecast-stack > .normals .stat-value { font-size: 17px; }
-  .forecast-stack > .normals .label { font-size: 12px; }
-  .forecast-stack > .normals .link-button { font-size: 13px; min-height: 36px; }
+  .forecast-stack > .normals .stat-name { font-size: 11px; }
+  .forecast-stack > .normals .stat-value { font-size: 15px; }
+  .forecast-stack > .normals .label { font-size: 11px; }
+  .forecast-stack > .normals .link-button { font-size: 12px; min-height: 32px; }
   #weeks { display: contents !important; }
   .forecast-stack > *, .usually-stack > * { min-width: 0; }
   /* What usually happens: cards side by side, the climate comparison across the bottom. */
