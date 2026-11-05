@@ -35,6 +35,9 @@
   "functions": {
     "api/history.js": {
       "maxDuration": 60
+    },
+    "api/uv.js": {
+      "maxDuration": 60
     }
   }
 }

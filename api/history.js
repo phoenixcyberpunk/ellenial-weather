@@ -4,7 +4,7 @@
 // heavy to make and changes slowly: Vercel's edge caches it for 30 days per place.
 // Coordinates are rounded to 0.1° (about 10 km) so nearby visitors share one cached answer.
 
-const { smhiTemps, smhiRain, smhiSun, modelDays, uvDays } = require("../lib/sources/historySources");
+const { smhiTemps, smhiRain, smhiSun, modelDays } = require("../lib/sources/historySources");
 const { summarise } = require("../lib/history");
 
 const GOTHENBURG = { lat: 57.7, lon: 12.0 };
@@ -29,9 +29,10 @@ module.exports = async (req, res) => {
   // SMHI's stations are all in Sweden, so elsewhere their lookups are skipped.
   const inSweden = lat >= 55 && lat <= 69.5 && lon >= 10.5 && lon <= 24.5;
   const none = () => Promise.resolve(null);
-  const [tRes, rRes, sRes, mRes, uvRes] = await Promise.allSettled([
+  // UV comes separately from /api/uv, so a slow UV archive never holds this up.
+  const [tRes, rRes, sRes, mRes] = await Promise.allSettled([
     inSweden ? smhiTemps(lat, lon) : none(), inSweden ? smhiRain(lat, lon) : none(), inSweden ? smhiSun(lat, lon) : none(),
-    modelDays(lat, lon), uvDays(lat, lon)
+    modelDays(lat, lon)
   ]);
 
   if (mRes.status === "rejected") {
@@ -43,8 +44,7 @@ module.exports = async (req, res) => {
   const model = mRes.value.days;
   const got = (r) => (r.status === "fulfilled" && r.value ? r.value : null);
   const t = got(tRes), r = got(rRes), s = got(sRes);
-  const uv = uvRes.status === "fulfilled" ? uvRes.value : null;
-  const out = summarise({ temps: t && t.days, rain: r && r.days, sun: s && s.days, model, uv, south: lat < 0 });
+  const out = summarise({ temps: t && t.days, rain: r && r.days, sun: s && s.days, model, uv: null, south: lat < 0 });
 
   const ERA5 = "ERA5 (Open-Meteo)";
   const src = (res, hit) => hit
@@ -55,14 +55,13 @@ module.exports = async (req, res) => {
     temps: src(tRes, t),
     rain: src(rRes, r),
     sun: src(sRes, s),
-    uv: uv ? { kind: "forecast archive", name: "Open-Meteo forecast archive" } : null,
     changing: out.changing ? (out.changing.from === "station" ? src(tRes, t) : { kind: "model", name: ERA5 }) : null
   };
   out.generatedAt = new Date().toISOString();
   out.tookMs = Date.now() - started;
 
-  // Only cache a full answer for long; a fallback (station or UV missing) retries within a day.
-  const complete = [tRes, rRes, sRes, uvRes].every((x) => x.status === "fulfilled");
+  // Only cache a full answer for long; a fallback (station data missing) retries within a day.
+  const complete = [tRes, rRes, sRes].every((x) => x.status === "fulfilled");
   res.setHeader("Cache-Control", complete
     ? "public, s-maxage=2592000, stale-while-revalidate=2592000"
     : "public, s-maxage=86400, stale-while-revalidate=86400");

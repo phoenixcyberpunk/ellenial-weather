@@ -120,6 +120,17 @@
     }
     card.appendChild(frostStrip(f));
 
+    if (!f.firstAutumn.typical || !f.lastSpring.typical) {
+      // Frost in fewer than half the winters: there's no "usual" date, only how often.
+      var some = el("div", "fact");
+      some.appendChild(el("p", "fact-head", "Frost in " + (f.seasons - f.noFrostSeasons) + " of the last " + f.seasons + " winters"));
+      if (f.lastSpring.safe) some.appendChild(el("p", "fact-sub", "Plant out after " + fmt(f.lastSpring.safe)));
+      card.appendChild(some);
+      card.appendChild(el("p", "section-text", "About " + f.nightsPerYear + " frost nights a winter."));
+      card.appendChild(el("p", "caveat", "Ground frost can come earlier."));
+      card.appendChild(el("p", "source-note", sourceLine([{ what: "nights", src: h.sources.temps }], (f.startMonth === 1 ? "winters " + f.from + "–" + f.to : "winters " + f.from + "/" + String(f.from + 1).slice(2) + " to " + (f.to - 1) + "/" + String(f.to).slice(2)))));
+      return;
+    }
     var autumn = el("div", "fact");
     autumn.appendChild(el("p", "fact-head", "First frost in autumn: usually around " + fmt(f.firstAutumn.typical)));
     var a = [];
@@ -249,7 +260,7 @@
 
   function render(h) {
     $("usually-loading").hidden = true;
-    var parts = [renderWeek, renderNormals, renderFrost, renderSun, renderUv, renderChange];
+    var parts = [renderWeek, renderNormals, renderFrost, renderSun, renderChange];
     parts.forEach(function (fn) {
       try { fn(h); } catch (e) { console.warn("usually:", fn.name, e); }
     });
@@ -264,6 +275,7 @@
   function load() {
     var place = window.EllenialPlace.get(), mine = ++loadSeq;
     var lat = Math.round(place.lat * 10) / 10, lon = Math.round(place.lon * 10) / 10;
+    if (!retried) loadUv(lat, lon);
     fetch("/api/history?lat=" + lat + "&lon=" + lon)
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (h) { if (mine === loadSeq) render(h); })
@@ -276,12 +288,24 @@
   }
   var retried = false;
 
+  // UV on its own: its archive can be slow for a new place, so it fills in when ready.
+  var uvSeq = 0;
+  function loadUv(lat, lon) {
+    var mine = ++uvSeq, card = $("u-uv");
+    clearAfter(card, 1);
+    card.appendChild(el("p", "loading", "Gathering UV records…"));
+    fetch("/api/uv?lat=" + lat + "&lon=" + lon)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { if (mine === uvSeq) renderUv({ uv: d.uv }); })
+      .catch(function () { if (mine === uvSeq) renderUv({ uv: null }); });
+  }
+
   window.EllenialPlace.onChange(function () {
     retried = false;
     var loading = $("usually-loading");
     loading.textContent = "Going through 35 years of weather…";
     loading.hidden = false;
-    ["u-frost", "u-sun-card", "u-uv", "u-change"].forEach(function (id) { clearAfter($(id), 1); });
+    ["u-frost", "u-sun-card", "u-change"].forEach(function (id) { clearAfter($(id), 1); });
     ["u-temp", "u-rain", "u-sun"].forEach(function (id) { $(id).textContent = "–"; });
     $("u-week-note").textContent = "";
     $("normals-title").textContent = "After the forecasts end";
