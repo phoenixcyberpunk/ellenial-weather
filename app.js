@@ -114,13 +114,14 @@
   // Partly cloudy and clear show the moon after dark. On breezy hours that aren't already
   // "windy", a little wind spiral sits in the corner of the sun or cloud, so they're never hidden.
   var BREEZE = 6; // m/s; WIND (the big swoops) starts at 10, set in lib/combine.js
-  var SPOKEN = { THUNDER: "thunder", SUN: "sunny", CLEAR: "clear", MIX: "partly cloudy", CLOUDY: "grey", RAIN: "rain", SNOW: "snow", WIND: "windy" };
+  var SPOKEN = { THUNDER: "thunder", DRIZZLE: "drizzle", SUN: "sunny", CLEAR: "clear", MIX: "partly cloudy", CLOUDY: "grey", RAIN: "rain", SNOW: "snow", WIND: "windy" };
   function iconName(word, day) {
     if (word === "SUN") return "sun";
     if (word === "CLEAR") return "clear";
     if (word === "MIX") return day === false ? "mix-night" : "mix-day";
     if (word === "CLOUDY") return "cloudy";
     if (word === "RAIN") return "rain";
+    if (word === "DRIZZLE") return "rain"; // TODO: "drizzle" once Ellen's cloud-with-one-drop is drawn
     if (word === "SNOW") return "snow";
     if (word === "WIND") return "wind";
     if (word === "THUNDER") return "thunder";
@@ -463,7 +464,7 @@
     };
   }
 
-  var WORDS = { THUNDER: "Thundery", SUN: "Sunny", CLEAR: "Clear", MIX: "Partly cloudy", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
+  var WORDS = { THUNDER: "Thundery", DRIZZLE: "Drizzly", SUN: "Sunny", CLEAR: "Clear", MIX: "Partly cloudy", CLOUDY: "Grey", RAIN: "Wet", SNOW: "Snowy", WIND: "Windy" };
 
   function feel(temp) {
     if (temp <= 0) return "frosty";

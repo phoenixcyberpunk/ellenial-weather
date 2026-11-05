@@ -10,7 +10,7 @@ SRC = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(SRC, "..", "..", "icons", "w")
 NAMES = ["sun", "clear", "mix-day", "mix-night", "cloudy", "rain", "snow", "wind", "breeze", "thunder"]
 SIZE = 144
-THICKEN = {"wind": 17}  # px of dilation at 1024 px
+THICKEN = {"wind": 13}  # px of dilation at 1024 px
 WINDOW = 840  # px of the 1024 canvas shown; the drawings fill roughly 700–800 of it
 
 os.makedirs(OUT, exist_ok=True)

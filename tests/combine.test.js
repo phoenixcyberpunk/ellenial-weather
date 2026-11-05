@@ -63,3 +63,10 @@ test("thunder needs two forecasts and a third of the votes", () => {
   assert.strictEqual(h.thunderVotes, 2);
   assert.strictEqual(h.word, "THUNDER");
 });
+
+test("light rain is drizzle, from 0.5 mm an hour it's rain", () => {
+  const base = { temp: 8, rainShare: 1, wind: 3, cloud: 100, day: true };
+  assert.strictEqual(weatherWord({ ...base, mm: 0.2 }), "DRIZZLE");
+  assert.strictEqual(weatherWord({ ...base, mm: 0.5 }), "RAIN");
+  assert.strictEqual(weatherWord({ ...base, temp: 0, mm: 0.2 }), "SNOW");
+});
