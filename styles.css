@@ -157,16 +157,30 @@ a:hover { text-decoration-thickness: 2px; }
 /* Computers and tablets on their side: a wider page that uses the room. One page for
    everyone, same address; nothing about data or accounts changes. */
 @media (min-width: 900px) {
-  .page { max-width: 1040px; padding: 36px 28px 48px; gap: 20px; }
-  .tabs { max-width: 460px; }
-  .place-panel { align-self: flex-end; width: 420px; }
-  .now-temp { font-size: 84px; }
-  .now-line { font-size: 18px; }
-  .week th, .week td { font-size: 15px; }
-  .week-word { font-size: 11.5px; }
-  .week-hi { font-size: 21px; }
+  .page { max-width: 1120px; padding: 28px 24px 40px; gap: 14px; }
+  .tabs { max-width: 420px; }
+  .place-panel { align-self: flex-end; width: 400px; }
+  /* Compact: a bit smaller than on a phone, since a computer is read from closer up. */
+  .card { padding: 16px 16px; gap: 10px; border-radius: 20px; }
+  .now-temp { font-size: 58px; }
+  .now-line { font-size: 15px; }
+  .title { font-size: 18px; }
+  .week th, .week td { padding: 5px 0; font-size: 13px; }
+  .week td { height: 36px; }
+  .day-btn { min-height: 44px; }
+  .week-hi { font-size: 17px; }
+  .week-lo { font-size: 12px; }
+  .week-word { font-size: 9.5px; }
+  .stat { padding: 10px 10px; }
+  .stat-value { font-size: 19px; }
+  .normals { padding: 16px 18px; border-radius: 20px; }
+  /* Forecast: Right now across the top, then the weeks and the usual-week card two by two. */
+  .forecast-stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .forecast-stack > .card:first-child, .forecast-stack > .loading { grid-column: 1 / -1; }
+  #weeks { display: contents !important; }
+  .forecast-stack > *, .usually-stack > * { min-width: 0; }
   /* What usually happens: cards side by side, the climate comparison across the bottom. */
-  .usually-stack { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  .usually-stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
   .usually-stack > .loading, .usually-stack > #u-change { grid-column: 1 / -1; }
 }
 
