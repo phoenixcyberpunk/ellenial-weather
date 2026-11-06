@@ -6,20 +6,14 @@
 const { uvDays } = require("../lib/sources/historySources");
 const { uvByMonth } = require("../lib/history");
 
-function parseCoord(value, min, max) {
-  const n = Number(value);
-  return Number.isFinite(n) && n >= min && n <= max ? Math.round(n * 10) / 10 : null;
-}
+const { canonical, answered } = require("../lib/coords");
 
 module.exports = async (req, res) => {
-  const url = new URL(req.url, "http://local");
-  const lat = parseCoord(url.searchParams.get("lat") ?? 57.7, -90, 90);
-  const lon = parseCoord(url.searchParams.get("lon") ?? 12.0, -180, 180);
+  // Only rounded (0.1°) addresses reach the source; see lib/coords.js.
+  const c = canonical(req, { lat: 57.7, lon: 12 });
+  if (answered(res, c)) return;
+  const { lat, lon } = c;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-  if (lat === null || lon === null) {
-    res.statusCode = 400;
-    return res.end(JSON.stringify({ error: "lat and lon must be numbers" }));
-  }
   try {
     const uv = uvByMonth(await uvDays(lat, lon));
     res.setHeader("Cache-Control", uv

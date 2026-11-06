@@ -11,14 +11,11 @@ const { combine } = require("../lib/combine");
 const { buildDays, localClock } = require("../lib/days");
 const { runsOwnModel } = require("../lib/domains");
 
-const HOUR = 3600 * 1000;
-const GOTHENBURG = { lat: 57.71, lon: 11.97 };
-const FALLBACK_TZ = "Europe/Stockholm";
+const { canonical, answered } = require("../lib/coords");
 
-function parseCoord(value, min, max) {
-  const n = Number(value);
-  return Number.isFinite(n) && n >= min && n <= max ? Math.round(n * 100) / 100 : null;
-}
+const HOUR = 3600 * 1000;
+const GOTHENBURG = { lat: 57.7, lon: 12 };
+const FALLBACK_TZ = "Europe/Stockholm";
 
 const reason = (r) => String((r.reason && r.reason.message) || r.reason);
 
@@ -34,14 +31,10 @@ function hoursForPage(hours, tz, now) {
 
 module.exports = async (req, res) => {
   const started = Date.now();
-  const url = new URL(req.url, "http://local");
-  const lat = parseCoord(url.searchParams.get("lat") ?? GOTHENBURG.lat, -90, 90);
-  const lon = parseCoord(url.searchParams.get("lon") ?? GOTHENBURG.lon, -180, 180);
-  if (lat === null || lon === null) {
-    res.statusCode = 400;
-    res.setHeader("Content-Type", "application/json");
-    return res.end(JSON.stringify({ error: "lat and lon must be numbers" }));
-  }
+  // Only rounded (0.1°) addresses reach the sources; see lib/coords.js.
+  const c = canonical(req, GOTHENBURG);
+  if (answered(res, c)) return;
+  const { lat, lon } = c;
 
   const [smhiRes, metRes, omRes, obsRes] = await Promise.allSettled([
     smhi(lat, lon), met(lat, lon), openMeteo(lat, lon), smhiObserved(lat, lon)

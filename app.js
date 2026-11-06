@@ -624,7 +624,9 @@
   var loadSeq = 0;
   function load() {
     var place = window.EllenialPlace.get(), mine = ++loadSeq;
-    fetch("/api/forecast?lat=" + place.lat + "&lon=" + place.lon)
+    // Forecasts are shared per 0.1° (about 11 km); the server only answers rounded addresses.
+    var lat = Math.round(place.lat * 10) / 10 || 0, lon = Math.round(place.lon * 10) / 10 || 0;
+    fetch("/api/forecast?lat=" + lat + "&lon=" + lon)
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (data) { if (mine === loadSeq) render(data); })
       .catch(function () { if (mine === loadSeq) fail(); });
