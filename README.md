@@ -75,3 +75,5 @@ Hand-drawn by Ellen in Procreate. The page's copies are built from `art/weather-
 ## Licence
 
 AGPL-3.0, same as the [Ellenial site](https://github.com/phoenixcyberpunk/ellenial). See `LICENSE`.
+
+The Ellenial name and logo aren't covered by the code licence, see [TRADEMARK.md](TRADEMARK.md).
