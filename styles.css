@@ -378,3 +378,7 @@ table.change td:last-child { font-weight: 700; }
 /* Something couldn't be reached: Ellen's puzzled cloud above the message, no breathing animation */
 .loading.oops { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px; animation: none; color: var(--ink); }
 .oops-cloud { width: 88px; height: 88px; }
+
+/* "Ellenial" above the app's name (decided 8 Nov 2026): credit where credit is due, without making the name longer. */
+.ellenial-eyebrow { display: block; font-family: 'DM Sans', system-ui, sans-serif; font-size: 11px; line-height: 14px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin: 0 0 2px; }
+.brand-name { display: flex; flex-direction: column; }
